@@ -35,8 +35,9 @@
   "dependencies": {
     "@types/jest": "^25.1.4",
     "@types/mkdirp": "^1.0.0",
-    "@types/node": "^13.9.8",
+    "@types/node": "^13.13.52",
     "amqplib": "^0.5.5",
+    "dotenv": "^16.0.3",
     "fakerator": "^0.3.6",
     "ioredis": "^4.14.1",
     "kafka-node": "^5.0.0",

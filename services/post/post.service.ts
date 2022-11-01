@@ -5,6 +5,8 @@ import DbService from "moleculer-db";
 import MongooseDbAdapter from 'moleculer-db-adapter-mongoose'
 import Post from './models/post.model'
 import * as _ from 'lodash'
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 import Fakerator from 'fakerator'
 const fake = Fakerator()
@@ -12,7 +14,7 @@ const fake = Fakerator()
 module.exports = {
 	name: "posts",
 	mixins: [DbService],
-	adapter: new MongooseDbAdapter("mongodb://localhost:27017/ms-test-db"),
+	adapter: new MongooseDbAdapter(process.env.MONGODB_URI),
 	model: Post,
 	actions:{
 		/**
