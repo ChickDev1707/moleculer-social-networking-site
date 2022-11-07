@@ -1,46 +1,30 @@
 "use strict";
+import { Service, ServiceBroker, Context, Errors } from "moleculer";
+import { AddFriendDto } from "./dtos/add-friend.dto";
+import { CreateUserDtoSchema } from "./dtos/create-user.dto";
+import { UserAction } from "./actions/user.action";
 
-import { driver, auth } from 'neo4j-driver'
-import { Service, ServiceBroker, Context } from "moleculer";
-import { CreateUserDto } from './dtos/create-user.dto';
-import { inspect } from 'util';
-import { AddFriendDto } from './dtos/add-friend.dto';
+export default class UserService extends Service {
 
-
-export default class GreeterService extends Service {
-
+	private userAction: UserAction;
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
-		let driverIns = driver('bolt://localhost:7687', auth.basic('neo4j', 'sudo'));
-		let session = driverIns.session()
+		this.userAction = new UserAction();
 
 		this.parseServiceSchema({
 			name: "users",
 			actions: {
 				/**
-				 * create new user
-				 * @param {Number} params 
+				 * Create new user
+				 * @param {Number} params
 				 */
 				create: {
 					rest: {
 						method: "POST",
 						path: "/",
 					},
-					body: {
-						user: "CreateUserDto"
-					},
-					async handler(ctx: Context<{ user: CreateUserDto }>): Promise<string> {
-						try {
-							const query = `Create (:User ${inspect(ctx.params.user)})`
-							session
-								.run(query)
-								.then(() => { console.log('add user') })
-								.catch((err) => console.log(err))
-							return query
-						} catch (err) {
-							console.log(err)
-						}
-					},
+					params: CreateUserDtoSchema,
+					handler: this.userAction.createUser,
 				},
 				addFriend: {
 					rest: {
@@ -48,26 +32,9 @@ export default class GreeterService extends Service {
 						path: ":userId/friends",
 					},
 					body: {
-						friendId: "string"
+						friendId: "string",
 					},
-					async handler(ctx: Context<AddFriendDto>): Promise<string> {
-						try {
-							const query = `	Match (user:User)
-															WHERE ID(user) = ${ctx.params.userId}
-															Match (friend:User)
-															WHERE ID(friend) = ${ctx.params.friendId}
-															Merge (user)-[:HAS_FRIEND]->(friend)
-															return friend
-														`
-							session
-								.run(query)
-								.then(() => { console.log('add friend') })
-								.catch((err) => console.log(err))
-							return query
-						} catch (err) {
-							console.log(err)
-						}
-					},
+					handler: async (ctx: Context<AddFriendDto>): Promise<string> => "add friend",
 				},
 
 			},
