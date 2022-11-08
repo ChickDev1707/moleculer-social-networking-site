@@ -1,5 +1,5 @@
 import { Context, Errors } from "moleculer";
-import { IApiResponse } from "../../../configs/api.type";
+import { IApiResponse } from "src/configs/api.type";
 import { CreateUserDto } from "../dtos/create-user.dto";
 import { UserDbService } from "../services/user-db.service";
 
