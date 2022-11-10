@@ -4,7 +4,6 @@ import "joi-extract-type";
 
 const CreateUserDtoSchema: any = Joi.object().keys({
   name: Joi.string().required(),
-  avatar: Joi.string().default(""),
   gender: Joi.string().valid(Object.values(Gender)).required(),
   dateOfBirth: Joi.date(),
   address: Joi.string().required(),
@@ -12,7 +11,6 @@ const CreateUserDtoSchema: any = Joi.object().keys({
 
 interface CreateUserDto{
   name: string;
-  avatar: string;
   gender: Gender;
   dateOfBirth: Date;
   address: string;
