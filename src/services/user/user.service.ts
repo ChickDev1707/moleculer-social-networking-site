@@ -1,8 +1,9 @@
 "use strict";
-import { Service, ServiceBroker, Context, Errors } from "moleculer";
-import { AddFriendDto } from "./dtos/add-friend.dto";
+import { Service, ServiceBroker} from "moleculer";
 import { CreateUserDtoSchema } from "./dtos/create-user.dto";
 import { UserAction } from "./actions/user.action";
+import { LoginDtoSchema } from "./dtos/login.dto";
+import { RegisterDtoSchema } from "./dtos/register.dto";
 
 export default class UserService extends Service {
 
@@ -26,26 +27,23 @@ export default class UserService extends Service {
 					params: CreateUserDtoSchema,
 					handler: this.userAction.createUser,
 				},
-				addFriend: {
+				login: {
 					rest: {
 						method: "POST",
-						path: ":userId/friends",
+						path: "/login",
 					},
-					body: {
-						friendId: "string",
-					},
-					handler: async (ctx: Context<AddFriendDto>): Promise<string> => "add friend",
+					params: LoginDtoSchema,
+					handler: this.userAction.login,
 				},
-
+				register: {
+					rest: {
+						method: "POST",
+						path: "/register",
+					},
+					params: RegisterDtoSchema,
+					handler: this.userAction.register,
+				},
 			},
 		});
-	}
-	// Action
-	public ActionHello(): string {
-		return "Hello Moleculer";
-	}
-
-	public ActionWelcome(name: string): string {
-		return `Welcome, ${name}`;
 	}
 }

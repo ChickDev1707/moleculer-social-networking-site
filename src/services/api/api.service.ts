@@ -1,5 +1,5 @@
 import {IncomingMessage} from "http";
-import {Service, ServiceBroker, Context} from "moleculer";
+import {Service, ServiceBroker, Context, Errors} from "moleculer";
 import ApiGateway from "moleculer-web";
 
 export default class ApiService extends Service {
@@ -99,7 +99,6 @@ export default class ApiService extends Service {
 			},
 
 			methods: {
-
 				/**
 				 * Authenticate the request. It checks the `Authorization` token value in the request header.
 				 * Check the token value & resolve the user by the token.
@@ -111,11 +110,11 @@ export default class ApiService extends Service {
 				 * @param {any} route
 				 * @param {IncomingMessage} req
 				 * @returns {Promise}
+				 */
 
-				async authenticate (ctx: Context, route: any, req: IncomingMessage): Promise < any >  => {
+				authenticate: async (ctx: Context, route: any, req: IncomingMessage): Promise <any> => {
 					// Read the token from header
 					const auth = req.headers.authorization;
-
 					if (auth && auth.startsWith("Bearer")) {
 						const token = auth.slice(7);
 
@@ -136,39 +135,36 @@ export default class ApiService extends Service {
 
 					} else {
 						// No token. Throw an error or do nothing if anonymous access is allowed.
-						// Throw new E.UnAuthorizedError(E.ERR_NO_TOKEN);
-						return null;
+						throw new Errors.MoleculerError("Unauthorize", 401);
 					}
 				},
-				 */
-
-				/**
-				 * Authorize the request. Check that the authenticated user has right to access the resource.
-				 *
-				 * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
-				 *
-				 * @param {Context} ctx
-				 * @param {Object} route
-				 * @param {IncomingMessage} req
-				 * @returns {Promise}
-
-				async authorize (ctx: Context < any, {
-					user: string;
-				} > , route: Record<string, undefined>, req: IncomingMessage): Promise < any > => {
-					// Get the authenticated user.
-					const user = ctx.meta.user;
-
-					// It check the `auth` property in action schema.
-					// @ts-ignore
-					if (req.$action.auth === "required" && !user) {
-						throw new ApiGateway.Errors.UnAuthorizedError("NO_RIGHTS", {
-							error: "Unauthorized",
-						});
-					}
-				},
-				 */
 			},
 
+			/**
+			 * Authorize the request. Check that the authenticated user has right to access the resource.
+			 *
+			 * PLEASE NOTE, IT'S JUST AN EXAMPLE IMPLEMENTATION. DO NOT USE IN PRODUCTION!
+			 *
+			 * @param {Context} ctx
+			 * @param {Object} route
+			 * @param {IncomingMessage} req
+			 * @returns {Promise}
+
+			async authorize (ctx: Context < any, {
+				user: string;
+			} > , route: Record<string, undefined>, req: IncomingMessage): Promise < any > => {
+				// Get the authenticated user.
+				const user = ctx.meta.user;
+
+				// It check the `auth` property in action schema.
+				// @ts-ignore
+				if (req.$action.auth === "required" && !user) {
+					throw new ApiGateway.Errors.UnAuthorizedError("NO_RIGHTS", {
+						error: "Unauthorized",
+					});
+				}
+			},
+				*/
 		});
 	}
 }
