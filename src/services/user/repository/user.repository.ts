@@ -1,10 +1,11 @@
-import { inspect } from "util";
 import { dirname } from "path";
 import * as dotenv from "dotenv";
+import Record from "neode/node_modules/neo4j-driver-core/types/record";
 import { pick } from "lodash";
-import Neode from "neode";
-import { CreateUserDto } from "../dtos/create-user.dto";
+import Neode, { Node } from "neode";
+import { v1 as uuidv1} from "uuid";
 import { RegisterDto } from "../dtos/register.dto";
+import { UserModel } from "../types/types";
 
 const userDir = dirname(__dirname);
 dotenv.config();
@@ -13,27 +14,41 @@ export class UserRepository {
   private instance = new Neode(process.env.USER_DB_URI, process.env.USER_DB_USERNAME, process.env.USER_DB_PASSWORD)
     .withDirectory(userDir + "/models");
 
-  public async createUser() {
-
-  }
   /**
    * Create new user (and add new account) when register to site
    * @param registerDto
    * @returns newUser
    */
-  public async createUserWithAccount(registerDto: RegisterDto) {
+  public async createUserWithAccount(registerDto: RegisterDto): Promise<Record> {
     // Pick user data from register data
-    const userData = pick(registerDto, ["name", "gender", "dateOfBirth"]);
+    const userData: any = pick(registerDto, ["name", "gender", "dateOfBirth"]);
+    userData.id = uuidv1();
     // Pick account data from register data
-    const userAccount = pick(registerDto, ["username", "password"]);
+    const userAccount: any = pick(registerDto, ["username", "password"]);
+    userAccount.id = uuidv1();
 
-    const query = `Create (:User ${inspect(userData)})-[:HAS]->(:Account ${inspect(userAccount)})`;
-    const newUser: any = null;
-    return newUser;
+    const query = "Create (:User $userData)-[:HAS]->(:Account $userAccount)";
+    let result = await this.instance.batch([{
+      query,
+      params: { userData, userAccount },
+    }]);
+    // Final result is the result of the first batch
+    result = result[0];
+    return result.records.length === 0 ? null : result.records[0];
   }
 
-  public async findAccountByUsername(username: string) {
-    const query = `Match (u:User)-[:HAS]->(a:Account {username: '${username}'}) return a`;
-
+  /**
+   * Find one account by user name if there is no account -> return null;
+   * @param username string
+   * @returns account record
+   */
+  public async findAccountByUsername(username: string): Promise<UserModel.Account> {
+    const result = await this.instance.cypher("Match (u:User)-[:HAS]->(account:Account {username: $username}) return account", { username });
+    if(result.records.length === 0){
+      return null;
+    }
+    // Account is the first record with account properties
+    // The name "account" is from query statement
+    return result.records[0].get("account").properties;
   }
 }

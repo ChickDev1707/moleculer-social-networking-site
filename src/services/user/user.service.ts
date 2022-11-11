@@ -19,14 +19,6 @@ export default class UserService extends Service {
 				 * Create new user
 				 * @param {Number} params
 				 */
-				create: {
-					rest: {
-						method: "POST",
-						path: "/",
-					},
-					params: CreateUserDtoSchema,
-					handler: this.userAction.createUser,
-				},
 				login: {
 					rest: {
 						method: "POST",
