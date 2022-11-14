@@ -3,49 +3,98 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import DbService from "moleculer-db";
 import MongooseDbAdapter from "moleculer-db-adapter-mongoose";
-import Fakerator from "fakerator";
-import * as _ from "lodash";
 import * as dotenv from "dotenv";
-import Post from "./models/post.model";
+import mongoose from "mongoose";
+import PostAction from "./actions/post.action";
+import postModel from "./models/post.model";
+
 dotenv.config();
 
-const fake = Fakerator();
+export default class PostService extends Service{
+	private postAct: PostAction;
 
-module.exports = {
-	name: "posts",
-	mixins: [DbService],
-	adapter: new MongooseDbAdapter(process.env.MONGODB_URI),
-	model: Post,
-	actions: {
-		/**
-		 * Say a 'Hello' action.
-		 *
-		 */
-		getPosts: {
-			rest: {
-				method: "GET",
-				path: "/",
-			},
-			async handler(): Promise<string> {
-				return this.adapter.find();
-			},
-		},
+	public constructor(public broker: ServiceBroker){
+		super(broker);
+		this.postAct = new PostAction();
+		this.parseServiceSchema({
+			name: "posts",
+			actions:{
+				createPost: {
+					rest: {
+						method: "POST",
+						path: "/",
+					},
+					handler: this.postAct.createPost,
+				},
 
-	},
-	methods: {
-		async seedDB() {
-			try {
-				const posts = await this.adapter.insertMany(_.times(20, () => {
-					const fakePost = fake.entity.post();
-					return {
-						title: fakePost.title,
-						content: fake.times(fake.lorem.paragraph, 10).join("\r\n"),
-					};
-				}));
-				console.log(posts);
-			} catch (err) {
-				console.log(err);
-			}
-		},
-	},
-};
+				updatePost: {
+					rest: {
+						method: "PATCH",
+						path:"/",
+					},
+					handler: this.postAct.updatePost,
+				},
+
+				deletePost: {
+					rest: {
+						method: "DELETE",
+						path: "/",
+					},
+					handler: this.postAct.deletePost,
+				},
+
+				getPosts: {
+					rest: {
+						method: "GET",
+						path: "/",
+					},
+					handler: this.postAct.getPosts,
+				},
+
+				getPostsByUserId: {
+					rest: {
+						method:"GET",
+						path: "/user",
+					},
+					handler: this.postAct.getPostsByUserId,
+
+				},
+
+				getPostsById: {
+					rest: {
+						method:"GET",
+						path: "/post",
+					},
+					handler: this.postAct.getPostsById,
+				},
+
+				likePost: {
+					rest: {
+						method: "PATCH",
+						path: "/post/like",
+					},
+					handler: this.postAct.likePost,
+				},
+
+				unlikePost: {
+					rest: {
+						method: "PATCH",
+						path: "/post/unlike",
+					},
+					handler: this.postAct.unlikePost,
+				},
+			},
+
+			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+			async started(): Promise<void> {
+				try {
+					await mongoose.connect(process.env.MONGODB_URI);
+					console.log("Post service: Connected to MongoDB");
+				} catch (error) {
+					console.log(error);
+				}
+			},
+		});
+	}
+}
+
