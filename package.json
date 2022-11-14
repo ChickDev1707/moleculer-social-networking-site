@@ -1,5 +1,5 @@
 {
-  "name": "{{projectName}}",
+  "name": "projectName",
   "version": "1.0.0",
   "description": "My Moleculer-based microservices project",
   "scripts": {
