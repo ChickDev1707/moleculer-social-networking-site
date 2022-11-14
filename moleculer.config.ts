@@ -129,7 +129,9 @@ module.exports = {
 	validator: new JoiValidator(),
 
 	// Global error handler
-	errorHandler: null,
+	errorHandler: (error: any) => {
+		console.log(error);
+	},
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
