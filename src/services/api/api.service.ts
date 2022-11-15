@@ -1,5 +1,5 @@
-import {IncomingMessage} from "http";
-import {Service, ServiceBroker, Context, Errors} from "moleculer";
+import { IncomingMessage } from "http";
+import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import ApiGateway from "moleculer-web";
 
 export default class ApiService extends Service {
@@ -35,7 +35,7 @@ export default class ApiService extends Service {
 					// The gateway will dynamically build the full routes from service schema.
 					autoAliases: true,
 
-					aliases:{},
+					aliases: {},
 					/**
 					 * Before call hook. You can check the request.
 					 * @param {Context} ctx
@@ -45,8 +45,8 @@ export default class ApiService extends Service {
 					 * @param {Object} data
 					onBeforeCall(ctx: Context<any,{userAgent: string}>,
 					 route: object, req: IncomingMessage, res: ServerResponse) {
-					  Set request headers to context meta
-					  ctx.meta.userAgent = req.headers["user-agent"];
+						Set request headers to context meta
+						ctx.meta.userAgent = req.headers["user-agent"];
 					},
 					 */
 
@@ -96,6 +96,21 @@ export default class ApiService extends Service {
 					// Options to `server-static` module
 					options: {},
 				},
+				// Set up cors
+				cors: {
+					// Configures the Access-Control-Allow-Origin CORS header.
+					origin: "*",
+					// Configures the Access-Control-Allow-Methods CORS header.
+					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+					// Configures the Access-Control-Allow-Headers CORS header.
+					allowedHeaders: "*",
+					// Configures the Access-Control-Expose-Headers CORS header.
+					exposedHeaders: [],
+					// Configures the Access-Control-Allow-Credentials CORS header.
+					credentials: false,
+					// Configures the Access-Control-Max-Age CORS header.
+					maxAge: 3600,
+				},
 			},
 
 			methods: {
@@ -112,7 +127,7 @@ export default class ApiService extends Service {
 				 * @returns {Promise}
 				 */
 
-				authenticate: async (ctx: Context, route: any, req: IncomingMessage): Promise <any> => {
+				authenticate: async (ctx: Context, route: any, req: IncomingMessage): Promise<any> => {
 					// Read the token from header
 					const auth = req.headers.authorization;
 					if (auth && auth.startsWith("Bearer")) {

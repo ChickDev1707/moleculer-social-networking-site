@@ -42,13 +42,16 @@ export class UserRepository {
    * @param username string
    * @returns account record
    */
-  public async findAccountByUsername(username: string): Promise<UserModel.Account> {
-    const result = await this.instance.cypher("Match (u:User)-[:HAS]->(account:Account {username: $username}) return account", { username });
+  public async findAccountByUsername(username: string): Promise<[UserModel.Account, UserModel.User]> {
+    const result = await this.instance.cypher("Match (user:User)-[:HAS]->(account:Account {username: $username}) return account, user", { username });
     if(result.records.length === 0){
       return null;
     }
     // Account is the first record with account properties
     // The name "account" is from query statement
-    return result.records[0].get("account").properties;
+    return [
+      result.records[0].get("account").properties,
+      result.records[0].get("user").properties,
+    ];
   }
 }

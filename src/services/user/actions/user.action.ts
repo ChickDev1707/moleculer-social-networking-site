@@ -16,7 +16,7 @@ export class UserAction {
       const registerDto: RegisterDto = ctx.params;
 
       // Validate user name
-      const account: UserModel.Account = await this.userRepo.findAccountByUsername(registerDto.username);
+      const [account]: [UserModel.Account, UserModel.User]= await this.userRepo.findAccountByUsername(registerDto.username);
       if (account) {
         throw new Errors.MoleculerClientError("Username already exists", 400);
       }
@@ -44,7 +44,7 @@ export class UserAction {
     try {
       const { username, password } = ctx.params;
 
-      const account: UserModel.Account = await this.userRepo.findAccountByUsername(username);
+      const [account, user]: [UserModel.Account, UserModel.User] = await this.userRepo.findAccountByUsername(username);
       if (!account) {
         throw new Errors.MoleculerClientError("Account does not exist", 404);
       }
@@ -57,10 +57,11 @@ export class UserAction {
       return {
         code: 200,
         message: "Login success",
+        data: user,
       };
       // Transform user entity (remove password and all protected fields)
     } catch (error) {
       handleError(error);
     }
   };
-}
+};
