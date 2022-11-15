@@ -24,8 +24,13 @@ export default class PostAction{
     public updatePost = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
             const {id, content, images}= ctx.params;
-            const imagesArray = images.split(",");
-            const updatedPost = await this.postRepo.updatePost(id, content, imagesArray);
+            let updatedPost: any = null;
+            if(images){
+                const imagesArray = images.split(",");
+                updatedPost = await this.postRepo.updatePost(id, content, imagesArray);
+            }else{
+                updatedPost = await this.postRepo.updatePost(id, content);
+            }
             return {
                 message: "Updated post",
                 code: 200,

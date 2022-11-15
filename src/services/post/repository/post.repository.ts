@@ -12,9 +12,14 @@ export class PostRepository {
         return newPost;
     }
 
-    public async updatePost(id: Types.ObjectId, content: string, images: string[]){
-        const updatedPost = await postModel.findOneAndUpdate({_id: id}, {content, images}, {new: true});
-        return updatedPost;
+    public async updatePost(id: Types.ObjectId, content: string, images?: string[]){
+        if(images){
+            const updatedPost = await postModel.findOneAndUpdate({_id: id}, {content, images}, {new: true});
+            return updatedPost;
+        }else{
+            const updatedPost = await postModel.findOneAndUpdate({_id: id}, {content}, {new: true});
+            return updatedPost;
+        }
     }
 
     public async deletePost(id: Types.ObjectId){
