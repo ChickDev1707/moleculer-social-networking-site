@@ -1,6 +1,5 @@
 "use strict";
 import { Service, ServiceBroker} from "moleculer";
-import { CreateUserDtoSchema } from "./dtos/create-user.dto";
 import { UserAction } from "./actions/user.action";
 import { LoginDtoSchema } from "./dtos/login.dto";
 import { RegisterDtoSchema } from "./dtos/register.dto";

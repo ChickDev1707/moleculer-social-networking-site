@@ -21,6 +21,7 @@
   "author": "",
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/jsonwebtoken": "^8.5.9",
     "@types/lodash": "^4.14.186",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
@@ -44,6 +45,7 @@
     "ioredis": "^4.14.1",
     "joi": "^17.7.0",
     "joi-extract-type": "^15.0.8",
+    "jsonwebtoken": "^8.5.1",
     "kafka-node": "^5.0.0",
     "lodash": "^4.17.21",
     "moleculer": "^0.14.0",

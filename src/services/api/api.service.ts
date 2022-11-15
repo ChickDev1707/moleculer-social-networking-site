@@ -1,4 +1,4 @@
-import { IncomingMessage } from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import ApiGateway from "moleculer-web";
 
@@ -43,12 +43,15 @@ export default class ApiService extends Service {
 					 * @param {IncomingMessage} req
 					 * @param {ServerResponse} res
 					 * @param {Object} data
-					onBeforeCall(ctx: Context<any,{userAgent: string}>,
-					 route: object, req: IncomingMessage, res: ServerResponse) {
-						Set request headers to context meta
-						ctx.meta.userAgent = req.headers["user-agent"];
-					},
 					 */
+					onBeforeCall: (ctx: Context<any, { accessToken: string }>,
+						route: object, req: IncomingMessage, res: ServerResponse) => {
+						// Attach accessToken to ctx
+						const auth = req.headers.authorization;
+						if (auth && auth.startsWith("Bearer")) {
+							ctx.meta.accessToken = auth.slice(7);
+						}
+					},
 
 					/**
 					 * After call hook. You can modify the data.

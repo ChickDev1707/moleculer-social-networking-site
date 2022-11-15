@@ -5,7 +5,7 @@ import { pick } from "lodash";
 import Neode, { Node } from "neode";
 import { v1 as uuidv1} from "uuid";
 import { RegisterDto } from "../dtos/register.dto";
-import { UserModel } from "../types/types";
+import { UserModel } from "../types/models";
 
 const userDir = dirname(__dirname);
 dotenv.config();
@@ -45,7 +45,7 @@ export class UserRepository {
   public async findAccountByUsername(username: string): Promise<[UserModel.Account, UserModel.User]> {
     const result = await this.instance.cypher("Match (user:User)-[:HAS]->(account:Account {username: $username}) return account, user", { username });
     if(result.records.length === 0){
-      return null;
+      return [null, null];
     }
     // Account is the first record with account properties
     // The name "account" is from query statement
@@ -53,5 +53,9 @@ export class UserRepository {
       result.records[0].get("account").properties,
       result.records[0].get("user").properties,
     ];
+  }
+  public async findUserById(id: string): Promise<UserModel.User>{
+    const result: Node<UserModel.User> = await this.instance.first<UserModel.User>("User", "id", id);
+    return result? result.properties(): null;
   }
 }
