@@ -1,6 +1,9 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import ApiGateway from "moleculer-web";
+import * as jwt from "jsonwebtoken";
+import { CustomJwtPayload } from "../user/types/jwt-payload.type";
+import { UserModel } from "../user/types/models";
 
 export default class ApiService extends Service {
 
@@ -134,21 +137,13 @@ export default class ApiService extends Service {
 					// Read the token from header
 					const auth = req.headers.authorization;
 					if (auth && auth.startsWith("Bearer")) {
-						const token = auth.slice(7);
+						const accessToken = auth.slice(7);
+						const token: CustomJwtPayload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET) as CustomJwtPayload;
 
-						// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
-						if (token === "123456") {
-							// Returns the resolved user. It will be set to the `ctx.meta.user`
-							return {
-								id: 1,
-								name: "John Doe",
-							};
-
-						} else {
-							// Invalid token
-							throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN, {
-								error: "Invalid Token",
-							});
+						const user: UserModel.User = await this.userRepo.findUserById(token.userId);
+						if (!user) {
+							// User in token is invalid
+							throw new Errors.MoleculerClientError("Unauthorized", 404);
 						}
 
 					} else {

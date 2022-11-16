@@ -9,7 +9,6 @@ import { UserRepository } from "../repository/user.repository";
 import { RegisterDto } from "../dtos/register.dto";
 import { handleError } from "../../../utils/erros.util";
 import { UserModel } from "../types/models";
-import { CustomJwtPayload } from "../types/jwt-payload.type";
 dotenv.config();
 
 export class UserAction {
@@ -41,54 +40,29 @@ export class UserAction {
       handleError(error);
     }
   };
-  public login = async (ctx: Context<LoginDto, {accessToken: string}>): Promise<IApiResponse> => {
+  public login = async (ctx: Context<LoginDto, { accessToken: string }>): Promise<IApiResponse> => {
     try {
-      if(ctx.meta.accessToken){
-        // Handle login with access token
-        await this.handleLoginWithToken(ctx.meta.accessToken);
-      }else{
-        return this.handleLoginWithoutToken(ctx.params);
-      }
-    } catch (error) {
-      handleError(error);
-    }
-  };
-  private handleLoginWithToken = async (accessToken: string): Promise<IApiResponse> => {
-    try{
-      const token: CustomJwtPayload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET) as CustomJwtPayload;
+      const { username, password } = ctx.params;
 
-      const user: UserModel.User = await this.userRepo.findUserById(token.userId);
-      if(!user) {
-        // User in token is invalid
-        throw new Errors.MoleculerClientError("Unauthorized", 404);
+      const [account, user]: [UserModel.Account, UserModel.User] = await this.userRepo.findAccountByUsername(username);
+      if (!account) {
+        throw new Errors.MoleculerClientError("Account does not exist", 404);
       }
+
+      const isValidated = await bcrypt.compare(password, account.password);
+      if (!isValidated) {
+        throw new Errors.MoleculerClientError("Wrong password!", 401);
+      }
+      const [accessToken] = this.generateTokens(user.id);
+
       return {
         code: 200,
         message: "Login success",
+        data: { user, accessToken },
       };
-    }catch(error){
-      throw new Errors.MoleculerClientError("Unauthorized", 404);
+    } catch (error) {
+      handleError(error);
     }
-  };
-  private handleLoginWithoutToken = async (params: LoginDto): Promise<IApiResponse> => {
-    const { username, password } = params;
-
-    const [account, user]: [UserModel.Account, UserModel.User] = await this.userRepo.findAccountByUsername(username);
-    if (!account) {
-      throw new Errors.MoleculerClientError("Account does not exist", 404);
-    }
-
-    const isValidated = await bcrypt.compare(password, account.password);
-    if (!isValidated) {
-      throw new Errors.MoleculerClientError("Wrong password!", 401);
-    }
-    const [accessToken] = this.generateTokens(user.id);
-
-    return {
-      code: 200,
-      message: "Login success",
-      data: {user, accessToken},
-    };
   };
 
   private generateTokens = (userId: string): [string, string] => {

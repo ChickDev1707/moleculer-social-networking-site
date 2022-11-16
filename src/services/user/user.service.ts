@@ -1,5 +1,5 @@
 "use strict";
-import { Service, ServiceBroker} from "moleculer";
+import { Service, ServiceBroker } from "moleculer";
 import { UserAction } from "./actions/user.action";
 import { LoginDtoSchema } from "./dtos/login.dto";
 import { RegisterDtoSchema } from "./dtos/register.dto";
