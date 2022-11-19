@@ -19,6 +19,7 @@ export default class PostService extends Service{
 		this.parseServiceSchema({
 			name: "posts",
 			actions:{
+				// Main service
 				createPost: {
 					rest: {
 						method: "POST",
@@ -83,13 +84,21 @@ export default class PostService extends Service{
 					},
 					handler: this.postAct.unlikePost,
 				},
+
+				// Helper service
+				pushNewCommentIdToPost: {
+					rest: {
+						method: "PATCH",
+						path: "/helper/push-new-comment-id-to-post",
+					},
+					handler: this.postAct.pushNewCommentIdToPost,
+				},
 			},
 
 			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 			async started(): Promise<void> {
 				try {
 					await mongoose.connect(process.env.MONGODB_URI);
-					console.log("Post service: Connected to MongoDB");
 				} catch (error) {
 					console.log(error);
 				}

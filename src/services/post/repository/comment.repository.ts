@@ -12,35 +12,42 @@ export class CommentRepository {
         return newComment;
     }
 
-    public async updateComment(commentId: Types.ObjectId, content: string){
+    public async updateComment(id: Types.ObjectId, content: string){
         const modifiedAt = new Date((new Date()).getTime() + 24*60*60*1000);
-        const updatedComment = await commentModel.findOneAndUpdate({_id: commentId}, {content, modifiedAt}, {new: true});
+        const updatedComment = await commentModel.findOneAndUpdate({_id: id}, {content, modifiedAt}, {new: true});
         return updatedComment;
     }
 
-    public async deleteComment(commentId: Types.ObjectId){
-        const deletedComment = await commentModel.findOneAndDelete({_id: commentId});
+    public async deleteComment(id: Types.ObjectId){
+        const deletedComment = await commentModel.findOneAndDelete({_id: id});
         return deletedComment;
     }
 
     public async getComment(postId: Types.ObjectId){
-        const comments = await commentModel.find({postId, parent: "x"});
+        const comments = await commentModel.find({postId, parent: "x"}).populate("reply");
         return comments;
     }
 
-    public async isCommented(commentId: Types.ObjectId, userId: Types.ObjectId){
-        const checkComment = await commentModel.find({_id: commentId, likes: userId});
+    public async likeComment(id: Types.ObjectId, userId: Types.ObjectId){
+        const likedComment = await commentModel.findOneAndUpdate({_id: id}, {$push: {likes: userId}}, {new: true});
+        return likedComment;
+    }
+
+    public async unlikeComment(id: Types.ObjectId, userId: Types.ObjectId){
+        const unlikedComment = await commentModel.findOneAndUpdate({_id: id}, {$pull: {likes: userId}}, {new: true});
+        return unlikedComment;
+    }
+
+    // Helper repo
+    public async isCommented(id: Types.ObjectId, userId: Types.ObjectId){
+        const checkComment = await commentModel.find({_id: id, likes: userId});
         if(checkComment.length > 0) {return true;}
         return false;
     }
 
-    public async likeComment(commentId: Types.ObjectId, userId: Types.ObjectId){
-        const likedComment = await commentModel.findOneAndUpdate({_id: commentId}, {$push: {likes: userId}}, {new: true});
-        return likedComment;
+    public async pushNewCommentIdToParentComment(parentCommentId: Types.ObjectId, newCommentId: Types.ObjectId){
+        const commentResult = await commentModel.findOneAndUpdate({_id: parentCommentId}, {$push: {reply: newCommentId}}, {new: true});
+        return commentResult;
     }
 
-    public async unlikeComment(commentId: Types.ObjectId, userId: Types.ObjectId){
-        const unlikedComment = await commentModel.findOneAndUpdate({_id: commentId}, {$pull: {likes: userId}}, {new: true});
-        return unlikedComment;
-    }
 }

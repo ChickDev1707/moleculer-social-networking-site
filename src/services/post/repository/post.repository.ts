@@ -51,4 +51,10 @@ export class PostRepository {
         const unlikedPost = await postModel.findOneAndUpdate({_id: id}, {$pull: {likes: userId}}, {new: true});
         return unlikedPost;
     }
+
+    // Helper repo
+    public async pushNewCommentIdToPost(id: Types.ObjectId, commentId: Types.ObjectId){
+        const result = await postModel.findOneAndUpdate({_id: id}, {$push: {comments: commentId}}, {new: true});
+        return result;
+    }
 }

@@ -8,6 +8,7 @@ import { IApiResponse } from "../../../../configs/api.type";
 export default class PostAction{
     private postRepo = new PostRepository();
 
+    // Main action
     public createPost = async (ctx: Context<IPostDTO>): Promise<IApiResponse> => {
         try {
             const newPost = await this.postRepo.createPost(ctx.params);
@@ -119,6 +120,21 @@ export default class PostAction{
                 message: "Unliked post",
                 code: 200,
                 data: unlikedPost,
+            };
+        } catch (error) {
+            throw new Errors.MoleculerError("Internal server error", 500);
+        }
+    };
+
+    // Helper action
+    public pushNewCommentIdToPost = async (ctx: Context<any>): Promise<IApiResponse>=>{
+        try {
+            const {id, commentId} = ctx.params;
+            const result = await this.postRepo.pushNewCommentIdToPost(id, commentId);
+            return {
+                message: "Push new comment to post",
+                code: 200,
+                data: result,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);

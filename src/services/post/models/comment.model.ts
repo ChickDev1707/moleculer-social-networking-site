@@ -1,16 +1,17 @@
 import mongoose, { Types } from "mongoose";
 const { Schema, model } = mongoose;
 import { ICommentDTO } from "../dtos/comment.dto";
+import posts from "./post.model";
 
 const commentSchema = new Schema<ICommentDTO>({
     content: "string",
-    tag: [{type: Schema.Types.ObjectId}],
-    reply: [{type: Schema.Types.ObjectId}],
+    tag: [{type: Schema.Types.ObjectId}], // Ref users
+    reply: [{type: Schema.Types.ObjectId, ref: "comments"}],
     parent: "string",
-    likes: [{type: Schema.Types.ObjectId}],
-    user: {type: Schema.Types.ObjectId},
-    postId: {type: Schema.Types.ObjectId},
-    postUserId: {type: Schema.Types.ObjectId},
+    likes: [{type: Schema.Types.ObjectId}], // Ref users
+    user: {type: Schema.Types.ObjectId}, // Ref users
+    postId: {type: Schema.Types.ObjectId, ref: "posts"},
+    postUserId: {type: Schema.Types.ObjectId}, // REf users
     createAt: {
         type: Date,
         default: Date.now,
