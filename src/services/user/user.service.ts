@@ -36,7 +36,8 @@ export default class UserService extends Service {
 						method: "GET",
 						path: "/:userId/followings",
 					},
-					handler: this.userAction.login,
+					params: {userId: "string"},
+					handler: this.userAction.getFollowings,
 				},
 				/**
 				 * Get followers list, "Followers" are the users who follow you

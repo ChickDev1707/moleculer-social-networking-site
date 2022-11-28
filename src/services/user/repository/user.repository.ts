@@ -15,6 +15,7 @@ export class UserRepository {
   private instance = new Neode(process.env.USER_DB_URI, process.env.USER_DB_USERNAME, process.env.USER_DB_PASSWORD)
     .withDirectory(userDir + "/models");
 
+  // Authentication
   /**
    * Create new user (and add new account) when register to site
    * @param registerDto
@@ -56,10 +57,26 @@ export class UserRepository {
     return result? result.properties(): null;
   }
 
+  // Following api
+  /**
+   * Get list of people user has followed (followings);
+   * @param userId
+   * @returns user[]
+   */
+   public async getFollowings(userId: string): Promise<UserModel.User[]> {
+    const query: string = "MATCH (user:User {id: $userId})-[follow:FOLLOW]->(following:User) return following";
+    const result = await this.instance.cypher(query, {userId});
+    if(result.records.length === 0){
+      return null;
+    }
+    const followings: UserModel.User[] = result.records.map((record: Record)=> record.get("following").properties);
+    return followings;
+  }
+
   /**
    * Create the following relationship for two users
    * @param followDto
-   * @returns newUser
+   * @returns void
    */
   public async addFollowing(followDto: FollowDto): Promise<void> {
     const query = "MATCH (user:User {id: $userId}) MATCH (target:User {id: $targetId}) MERGE (user)-[:FOLLOW]->(target) RETURN *";
@@ -69,7 +86,7 @@ export class UserRepository {
   /**
    * Check if user already follow the target
    * @param followDto
-   * @returns newUser
+   * @returns boolean
    */
    public async checkHasFollowed(followDto: FollowDto): Promise<boolean> {
     const query: string = "MATCH (user:User {id: $userId})-[follow:FOLLOW]->(target:User {id: $targetId}) return follow";
