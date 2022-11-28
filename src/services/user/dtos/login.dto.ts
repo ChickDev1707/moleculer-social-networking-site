@@ -1,6 +1,5 @@
 
 import * as Joi from "@hapi/joi";
-import { Gender } from "../enums/gender.enum";
 import "joi-extract-type";
 
 const LoginDtoSchema: any = Joi.object().keys({

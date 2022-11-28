@@ -9,6 +9,7 @@ import { UserRepository } from "../repository/user.repository";
 import { RegisterDto } from "../dtos/register.dto";
 import { handleError } from "../../../utils/erros.util";
 import { UserModel } from "../types/models";
+import { FollowDto } from "../dtos/follow.dto";
 dotenv.config();
 
 export class UserAction {
@@ -59,6 +60,23 @@ export class UserAction {
         code: 200,
         message: "Login success",
         data: { user, accessToken },
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  public follow = async (ctx: Context<FollowDto>): Promise<IApiResponse> => {
+    try {
+      const hasFollowed: boolean = await this.userRepo.checkHasFollowed(ctx.params);
+      if(hasFollowed){
+        throw new Errors.MoleculerClientError("You already follow this user", 400);
+      }
+      await this.userRepo.addFollowing(ctx.params);
+      return {
+        code: 200,
+        message: "Follow success",
+        data: null,
       };
     } catch (error) {
       handleError(error);

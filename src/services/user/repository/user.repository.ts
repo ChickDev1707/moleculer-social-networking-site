@@ -6,6 +6,7 @@ import Neode, { Node } from "neode";
 import { v1 as uuidv1} from "uuid";
 import { RegisterDto } from "../dtos/register.dto";
 import { UserModel } from "../types/models";
+import { FollowDto } from "../dtos/follow.dto";
 
 const userDir = dirname(__dirname);
 dotenv.config();
@@ -28,12 +29,8 @@ export class UserRepository {
     userAccount.id = uuidv1();
 
     const query = "Create (:User $userData)-[:HAS]->(:Account $userAccount)";
-    let result = await this.instance.batch([{
-      query,
-      params: { userData, userAccount },
-    }]);
+    const result = await this.instance.writeCypher(query, {userData, userAccount});
     // Final result is the result of the first batch
-    result = result[0];
     return result.records.length === 0 ? null : result.records[0];
   }
 
@@ -57,5 +54,29 @@ export class UserRepository {
   public async findUserById(id: string): Promise<UserModel.User>{
     const result: Node<UserModel.User> = await this.instance.first<UserModel.User>("User", "id", id);
     return result? result.properties(): null;
+  }
+
+  /**
+   * Create the following relationship for two users
+   * @param followDto
+   * @returns newUser
+   */
+  public async addFollowing(followDto: FollowDto): Promise<void> {
+    const query = "MATCH (user:User {id: $userId}) MATCH (target:User {id: $targetId}) MERGE (user)-[:FOLLOW]->(target) RETURN *";
+    await this.instance.writeCypher(query, followDto);
+  }
+
+  /**
+   * Check if user already follow the target
+   * @param followDto
+   * @returns newUser
+   */
+   public async checkHasFollowed(followDto: FollowDto): Promise<boolean> {
+    const query: string = "MATCH (user:User {id: $userId})-[follow:FOLLOW]->(target:User {id: $targetId}) return follow";
+    const result = await this.instance.cypher(query, followDto);
+    if(result.records.length> 0){
+      return true;
+    }
+    return false;
   }
 }
