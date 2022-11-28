@@ -9,12 +9,14 @@ import { UserRepository } from "../repository/user.repository";
 import { RegisterDto } from "../dtos/register.dto";
 import { handleError } from "../../../utils/erros.util";
 import { UserModel } from "../types/models";
-import { FollowDto } from "../dtos/follow.dto";
+import { FollowingDto } from "../dtos/following.dto";
+import { FollowingAction } from "../enums/following-action.enum";
 dotenv.config();
 
 export class UserAction {
   private userRepo = new UserRepository();
 
+  // Auth
   public register = async (ctx: Context<RegisterDto>): Promise<IApiResponse> => {
     try {
       const registerDto: RegisterDto = ctx.params;
@@ -65,30 +67,50 @@ export class UserAction {
       handleError(error);
     }
   };
-
-  public follow = async (ctx: Context<FollowDto>): Promise<IApiResponse> => {
+  // Follow actions
+  public editFollowing = async (ctx: Context<FollowingDto>): Promise<IApiResponse> => {
     try {
       const hasFollowed: boolean = await this.userRepo.checkHasFollowed(ctx.params);
-      if(hasFollowed){
-        throw new Errors.MoleculerClientError("You already follow this user", 400);
+      if(ctx.params.actionType === FollowingAction.FOLLOW){
+        return this.follow(ctx.params, hasFollowed);
+      }else{
+        return this.unFollow(ctx.params, hasFollowed);
       }
-      await this.userRepo.addFollowing(ctx.params);
-      return {
-        code: 200,
-        message: "Follow success",
-        data: null,
-      };
     } catch (error) {
       handleError(error);
     }
   };
+  public follow = async (followingDto: FollowingDto, hasFollowed: boolean): Promise<IApiResponse> => {
+    if(hasFollowed){
+      throw new Errors.MoleculerClientError("You have already followed this user", 400);
+    }
+    await this.userRepo.addFollowing(followingDto);
+    return {
+      code: 200,
+      message: "Follow success",
+      data: null,
+    };
+  };
 
+  public unFollow = async (followingDto: FollowingDto, hasFollowed: boolean): Promise<IApiResponse> => {
+    if(!hasFollowed){
+      throw new Errors.MoleculerClientError("You didn't follow this user", 400);
+    }
+    await this.userRepo.deleteFollowing(followingDto);
+    return {
+      code: 200,
+      message: "Unfollow success",
+      data: null,
+    };
+  };
+
+  // Read followings/followers
   public getFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
     try {
       const followings = await this.userRepo.getFollowings(ctx.params.userId);
       return {
         code: 200,
-        message: "Get following list success",
+        message: "Get followings list success",
         data: followings,
       };
     } catch (error) {

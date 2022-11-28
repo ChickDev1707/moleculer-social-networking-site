@@ -6,7 +6,7 @@ import Neode, { Node } from "neode";
 import { v1 as uuidv1} from "uuid";
 import { RegisterDto } from "../dtos/register.dto";
 import { UserModel } from "../types/models";
-import { FollowDto } from "../dtos/follow.dto";
+import { FollowingDto } from "../dtos/following.dto";
 
 const userDir = dirname(__dirname);
 dotenv.config();
@@ -89,22 +89,31 @@ export class UserRepository {
 
   /**
    * Create the following relationship for two users
-   * @param followDto
+   * @param followingDto
    * @returns void
    */
-  public async addFollowing(followDto: FollowDto): Promise<void> {
+  public async addFollowing(followingDto: FollowingDto): Promise<void> {
     const query = "MATCH (user:User {id: $userId}) MATCH (target:User {id: $targetId}) MERGE (user)-[:FOLLOW]->(target) RETURN *";
-    await this.instance.writeCypher(query, followDto);
+    await this.instance.writeCypher(query, followingDto);
+  }
+  /**
+   * Delete the follow relationship to the target user (unFollow)
+   * @param followingDto
+   * @returns boolean
+   */
+   public async deleteFollowing(followingDto: FollowingDto): Promise<void> {
+    const query: string = "MATCH (user:User {id: $userId})-[follow:FOLLOW]->(target:User {id: $targetId}) DELETE follow";
+    await this.instance.writeCypher(query, followingDto);
   }
 
   /**
    * Check if user already follow the target
-   * @param followDto
+   * @param followingDto
    * @returns boolean
    */
-   public async checkHasFollowed(followDto: FollowDto): Promise<boolean> {
+   public async checkHasFollowed(followingDto: FollowingDto): Promise<boolean> {
     const query: string = "MATCH (user:User {id: $userId})-[follow:FOLLOW]->(target:User {id: $targetId}) return follow";
-    const result = await this.instance.cypher(query, followDto);
+    const result = await this.instance.cypher(query, followingDto);
     if(result.records.length> 0){
       return true;
     }

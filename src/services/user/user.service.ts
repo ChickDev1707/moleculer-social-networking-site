@@ -1,7 +1,7 @@
 "use strict";
 import { Service, ServiceBroker } from "moleculer";
 import { UserAction } from "./actions/user.action";
-import { FollowDtoSchema } from "./dtos/follow.dto";
+import { FollowingDtoSchema } from "./dtos/following.dto";
 import { LoginDtoSchema } from "./dtos/login.dto";
 import { RegisterDtoSchema } from "./dtos/register.dto";
 
@@ -19,14 +19,15 @@ export default class UserService extends Service {
 				 * Follow other users
 				 * @param {params} params
 				 */
-				follow: {
+				editFollowing: {
 					rest: {
 						method: "PATCH",
 						path: "/:userId/followings",
 					},
-					params: FollowDtoSchema,
-					handler: this.userAction.follow,
+					params: FollowingDtoSchema,
+					handler: this.userAction.editFollowing,
 				},
+
 				/**
 				 * Get followings list. “Following” is the term for the users who you follow.
 				 * @param {params} params
@@ -39,6 +40,7 @@ export default class UserService extends Service {
 					params: {userId: "string"},
 					handler: this.userAction.getFollowings,
 				},
+
 				/**
 				 * Get followers list, "Followers" are the users who follow you
 				 */
@@ -49,6 +51,7 @@ export default class UserService extends Service {
 					},
 					handler: this.userAction.getFollowers,
 				},
+
 				// AUth
 				login: {
 					rest: {
