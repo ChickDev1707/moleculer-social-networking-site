@@ -96,6 +96,19 @@ export class UserAction {
     }
   };
 
+  public getFollowers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+    try {
+      const followers = await this.userRepo.getFollowers(ctx.params.userId);
+      return {
+        code: 200,
+        message: "Get followers list success",
+        data: followers,
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   private generateTokens = (userId: string): [string, string] => {
 
     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" });

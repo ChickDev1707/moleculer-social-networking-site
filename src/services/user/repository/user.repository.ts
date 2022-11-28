@@ -57,20 +57,34 @@ export class UserRepository {
     return result? result.properties(): null;
   }
 
-  // Following api
+  // Follow api
   /**
    * Get list of people user has followed (followings);
    * @param userId
    * @returns user[]
    */
    public async getFollowings(userId: string): Promise<UserModel.User[]> {
-    const query: string = "MATCH (user:User {id: $userId})-[follow:FOLLOW]->(following:User) return following";
+    const query: string = "MATCH (user:User {id: $userId})-[:FOLLOW]->(following:User) return following";
     const result = await this.instance.cypher(query, {userId});
     if(result.records.length === 0){
       return null;
     }
     const followings: UserModel.User[] = result.records.map((record: Record)=> record.get("following").properties);
     return followings;
+  }
+  /**
+   * Get list of people who are following us (followers);
+   * @param userId
+   * @returns user[]
+   */
+   public async getFollowers(userId: string): Promise<UserModel.User[]> {
+    const query: string = "MATCH (user:User {id: $userId})<-[:FOLLOW]-(follower:User) return follower";
+    const result = await this.instance.cypher(query, {userId});
+    if(result.records.length === 0){
+      return null;
+    }
+    const followers: UserModel.User[] = result.records.map((record: Record)=> record.get("follower").properties);
+    return followers;
   }
 
   /**

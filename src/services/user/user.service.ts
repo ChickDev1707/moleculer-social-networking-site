@@ -44,10 +44,10 @@ export default class UserService extends Service {
 				 */
 				getFollowers: {
 					rest: {
-						method: "PATCH",
+						method: "GET",
 						path: "/:userId/followers",
 					},
-					handler: this.userAction.login,
+					handler: this.userAction.getFollowers,
 				},
 				// AUth
 				login: {
