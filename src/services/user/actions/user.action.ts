@@ -107,7 +107,7 @@ export class UserAction {
   // Read followings/followers
   public getFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
     try {
-      const followings = await this.userRepo.getFollowings(ctx.params.userId);
+      const followings: UserModel.User[] = await this.userRepo.getFollowings(ctx.params.userId);
       return {
         code: 200,
         message: "Get followings list success",
@@ -120,7 +120,7 @@ export class UserAction {
 
   public getFollowers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
     try {
-      const followers = await this.userRepo.getFollowers(ctx.params.userId);
+      const followers: UserModel.User[] = await this.userRepo.getFollowers(ctx.params.userId);
       return {
         code: 200,
         message: "Get followers list success",
@@ -131,10 +131,23 @@ export class UserAction {
     }
   };
 
+  public getAvailableUsers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+    try {
+      const users: UserModel.User[] = await this.userRepo.getAvailableUsers(ctx.params.userId);
+      return {
+        code: 200,
+        message: "Get available users success",
+        data: users,
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   private generateTokens = (userId: string): [string, string] => {
 
-    const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" });
-    const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+    const accessToken: string = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "7d" });
+    const refreshToken: string = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
 
     return [accessToken, refreshToken];
   };

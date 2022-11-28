@@ -43,16 +43,31 @@ export default class UserService extends Service {
 
 				/**
 				 * Get followers list, "Followers" are the users who follow you
+				 * @param {params} params
 				 */
 				getFollowers: {
 					rest: {
 						method: "GET",
 						path: "/:userId/followers",
 					},
+					params: {userId: "string"},
 					handler: this.userAction.getFollowers,
 				},
 
-				// AUth
+				/**
+				 * Get available user list - user who are either our follower or following
+				 * @param {params} params
+				 */
+				getAvailableUsers: {
+					rest: {
+						method: "GET",
+						path: "/:userId/recommend",
+					},
+					params: {userId: "string"},
+					handler: this.userAction.getAvailableUsers,
+				},
+
+				// Auth
 				login: {
 					rest: {
 						method: "POST",
