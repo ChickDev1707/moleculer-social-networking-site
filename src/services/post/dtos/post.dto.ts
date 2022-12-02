@@ -7,5 +7,5 @@ export interface IPostDTO {
     likes: Types.Array<Types.ObjectId>;
     comments: Types.Array<Types.ObjectId>;
     user: Types.ObjectId;
-    createAt: Date;
+    createdAt: Date;
 }

@@ -10,6 +10,6 @@ export interface ICommentDTO {
     user: Types.ObjectId;
     postId: Types.ObjectId;
     postUserId: Types.ObjectId;
-    createAt: Date;
+    createdAt: Date;
     modifiedAt: Date;
 }

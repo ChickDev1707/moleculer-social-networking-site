@@ -60,7 +60,7 @@ export default class PostAction{
         try {
             // Call getUserById(ctx.params.userID) --> user
             const user = {
-                following: ["637bb592cac1d671bfaf02d4"],
+                following: ["637bad328b8c922fa7392ed9", "637bb592cac1d671bfaf02d4"],
             };
             const posts = await this.postRepo.getPosts(user); // Chưa polupate với user
             return {

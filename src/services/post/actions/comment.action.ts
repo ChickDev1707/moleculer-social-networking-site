@@ -42,7 +42,7 @@ export default class CommentAction{
                 user: ctx.params.userId,
                 postId: ctx.params.postId,
                 postUserId: ctx.params.postUserId,
-                createAt: new Date((new Date()).getTime()),
+                createdAt: new Date((new Date()).getTime()),
                 modifiedAt: new Date((new Date()).getTime()),
             };
             const newComment = await this.commentRepo.createComment(commentTemp);

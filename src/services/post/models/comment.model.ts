@@ -12,7 +12,7 @@ const commentSchema = new Schema<ICommentDTO>({
     user: {type: Schema.Types.ObjectId}, // Ref users
     postId: {type: Schema.Types.ObjectId, ref: "posts"},
     postUserId: {type: Schema.Types.ObjectId}, // REf users
-    createAt: {
+    createdAt: {
         type: Date,
         default: Date.now,
     },
