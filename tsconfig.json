@@ -8,6 +8,7 @@
 		"sourceMap": true,
 		"pretty": true,
 		"target": "es6",
+		"rootDirs": ["src/"],
 		"outDir": "dist"
 	},
 	"include": ["./**/*"],

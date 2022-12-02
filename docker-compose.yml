@@ -1,82 +1,99 @@
 version: "3.3"
 services:
-  api:
-    build:
-      context: .
-    image: moleculer-demo
-    env_file: docker-compose.env
-    environment:
-      SERVICES: api
-      PORT: 3000
-    depends_on:
-      - nats
-      - redis
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api-gw.rule=PathPrefix(`/`)"
-      - "traefik.http.services.api-gw.loadbalancer.server.port=3000"
-    networks:
-      - internal
+  # api 
+  # api:
+  #   build:
+  #     context: .
+  #   image: moleculer-demo
+  #   env_file: docker-compose.env
+  #   environment:
+  #     SERVICES: api
+  #     PORT: 3000
+  #   depends_on:
+  #     - nats
+  #     - redis
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.api-gw.rule=PathPrefix(`/`)"
+  #     - "traefik.http.services.api-gw.loadbalancer.server.port=3000"
+  #   networks:
+  #     - internal
 
-  greeter:
-    build:
-      context: .
-    image: moleculer-demo
-    env_file: docker-compose.env
-    environment:
-      SERVICES: greeter
+  # services 
+  # user:
+  #   build:
+  #     context: .
+  #   image: moleculer-demo
+  #   env_file: docker-compose.env
+  #   environment:
+  #     SERVICES: greeter
 
-    depends_on:
-      - nats
-      - redis
-    networks:
-      - internal
+  #   depends_on:
+  #     - nats
+  #     - redis
+  #   networks:
+  #     - internal
 
-  post:
-    build:
-      context: .
-    image: moleculer-demo
-    env_file: docker-compose.env
-    environment:
-      SERVICES: post
+  # post:
+  #   build:
+  #     context: .
+  #   image: moleculer-demo
+  #   env_file: docker-compose.env
+  #   environment:
+  #     SERVICES: post
 
-    depends_on:
-      - nats
-      - redis
-    networks:
-      - internal
+  #   depends_on:
+  #     - nats
+  #     - redis
+  #   networks:
+  #     - internal
 
-  mongo:
-    image: mongo:4
-    volumes:
-      - data:/data/db
-    networks:
-      - internal
-
-  nats:
-    image: nats:2
-    networks:
-      - internal
-
-  redis:
-    image: redis:alpine
-    networks:
-      - internal
-
-  traefik:
-    image: traefik:v2.1
-    command:
-      - "--api.insecure=true" # Don't do that in production!
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+  # db
+  user-db:
+    image: neo4j:latest
+    container_name: user-db
     ports:
-      - 3000:80
-      - 3001:8080
+      - 7474:7474
+      - 7687:7687
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/volumes/user/import:/import
+      - ./docker/volumes/user/data:/data
+    env_file: docker-compose.env
     networks:
       - internal
-      - default
+
+  post-db:
+    image: mongo:latest
+    container_name: post-db
+    ports:
+      - 5000:27017
+    networks:
+      - internal
+
+  # nats:
+  #   image: nats:2
+  #   networks:
+  #     - internal
+
+  # redis:
+  #   image: redis:alpine
+  #   networks:
+  #     - internal
+
+  # traefik:
+  #   image: traefik:v2.1
+  #   command:
+  #     - "--api.insecure=true" # Don't do that in production!
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #   ports:
+  #     - 3000:80
+  #     - 3001:8080
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - internal
+  #     - default
 
 networks:
   internal:
