@@ -15,6 +15,20 @@ export default class UserService extends Service {
 		this.parseServiceSchema({
 			name: "users",
 			actions: {
+				// Profile
+				/**
+				 * Follow other users
+				 * @param {params} params
+				 */
+				getUser: {
+					rest: {
+						method: "GET",
+						path: "/:userId",
+					},
+					params: { userId: "string" },
+					handler: this.userAction.getUserInfo,
+				},
+				// Follow
 				/**
 				 * Follow other users
 				 * @param {params} params
@@ -37,7 +51,7 @@ export default class UserService extends Service {
 						method: "GET",
 						path: "/:userId/followings",
 					},
-					params: {userId: "string"},
+					params: { userId: "string" },
 					handler: this.userAction.getFollowings,
 				},
 
@@ -50,7 +64,7 @@ export default class UserService extends Service {
 						method: "GET",
 						path: "/:userId/followers",
 					},
-					params: {userId: "string"},
+					params: { userId: "string" },
 					handler: this.userAction.getFollowers,
 				},
 
@@ -63,7 +77,7 @@ export default class UserService extends Service {
 						method: "GET",
 						path: "/:userId/recommend",
 					},
-					params: {userId: "string"},
+					params: { userId: "string" },
 					handler: this.userAction.getAvailableUsers,
 				},
 

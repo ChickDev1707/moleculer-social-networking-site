@@ -57,7 +57,7 @@ export class UserRepository {
     return result ? result.properties() : null;
   }
 
-  // Follow api
+  // Follow
   /**
    * Get list of people user has followed (followings);
    * @param userId

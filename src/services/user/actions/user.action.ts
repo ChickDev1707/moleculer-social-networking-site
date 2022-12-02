@@ -15,7 +15,19 @@ dotenv.config();
 
 export class UserAction {
   private userRepo = new UserRepository();
-
+  // User profile
+  public getUserInfo = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+    try {
+      const user: UserModel.User = await this.userRepo.findUserById(ctx.params.userId);
+      return {
+        code: 200,
+        message: "Get user success",
+        data: user,
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  };
   // Auth
   public register = async (ctx: Context<RegisterDto>): Promise<IApiResponse> => {
     try {
