@@ -57,15 +57,6 @@ export default class CommentService extends Service{
 					},
 					handler: this.commentAct.reactComment,
 				},
-
-				// Helper service
-				pushNewCommentIdToParentComment: {
-					rest: {
-						method: "PATCH",
-						path: "/helper/push-new-coment-id-to-parent-comment",
-					},
-					handler: this.commentAct.pushNewCommentIdToParentComment,
-				},
             },
 			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 			async started(): Promise<void> {

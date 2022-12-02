@@ -1,17 +1,20 @@
+/* eslint-disable capitalized-comments */
 import mongoose from "mongoose";
 const { Types }  = mongoose;
 import { BrokerNode, Context, Errors, ServiceBroker  } from "moleculer";
 import { ICommentDTO } from "../dtos/comment.dto";
 import { CommentRepository } from "../repository/comment.repository";
+import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
 
 export default class CommentAction{
     private commentRepo = new CommentRepository();
+    private postRepo = new PostRepository();
 
     public getcomments = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
             const {postId} = ctx.params;
-            const comments = await this.commentRepo.getComment(postId);
+            const comments = await this.commentRepo.getComments(postId); // Chưa polupate với user
             return {
                 message: "Successful request",
                 code: 200,
@@ -39,19 +42,18 @@ export default class CommentAction{
                 user: ctx.params.userId,
                 postId: ctx.params.postId,
                 postUserId: ctx.params.postUserId,
-                createAt: new Date((new Date()).getTime() + 24*60*60*1000),
-                modifiedAt: new Date((new Date()).getTime() + 24*60*60*1000),
+                createAt: new Date((new Date()).getTime()),
+                modifiedAt: new Date((new Date()).getTime()),
             };
             const newComment = await this.commentRepo.createComment(commentTemp);
-            // Push newCommentId to "comments" of post
+            // Push newCommentId to post-->comments
             const postId = ctx.params.postId;
-            const newCommentId = newComment.id;
-            console.log("newCommentId: ", newCommentId);
-            await ctx.broker.call("posts.pushNewCommentIdToPost", {id: postId, commentId: newCommentId});
+            const commentId = newComment.id;
+            await this.postRepo.pushNewCommentIdToPost(postId, commentId);
             // If newComment have parentComment, push newCommentId to "reply" of parentComment
             if(ctx.params.parentCommentId){
                 const parentCommentId = ctx.params.parentCommentId;
-                await ctx.broker.call("comments.pushNewCommentIdToParentComment", {parentCommentId, newCommentId});
+                await this.commentRepo.pushNewCommentIdToParentComment(parentCommentId, commentId);
             };
             return {
                 message: "Successful request",
@@ -72,8 +74,8 @@ export default class CommentAction{
                     code: 400,
                 };
             };
-            const {id, content} = ctx.params;
-            const updatedComment = await this.commentRepo.updateComment(id, content);
+            const {commentId, content} = ctx.params;
+            const updatedComment = await this.commentRepo.updateComment(commentId, content);
             return {
                 message: "Updated comment",
                 code: 200,
@@ -86,11 +88,17 @@ export default class CommentAction{
 
     public deleteComment = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const deletedComment = await this.commentRepo.deleteComment(ctx.params.id);
+            const deletedComment = await this.commentRepo.deleteComment(ctx.params.commentId);
+            // Delete commentId in post-->comments
+            const postId = ctx.params.postId;
+            const commentId = deletedComment.id;
+            await this.postRepo.pullDeletedCommentIdInPost(postId, commentId);
+            // Return new list comment
+            const newListComment = await this.commentRepo.getComments(postId);
             return {
                 message: "Deleted comment",
                 code: 200,
-                data: deletedComment,
+                data: newListComment,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
@@ -99,17 +107,17 @@ export default class CommentAction{
 
     public reactComment = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id, userId} = ctx.params;
-            const isCommented = await this.commentRepo.isCommented(id, userId);
-            if(isCommented){
-                const unlikedComment = await this.commentRepo.unlikeComment(id, userId);
+            const {commentId, userId} = ctx.params;
+            const isLikedComment = await this.commentRepo.isLikedComment(commentId, userId);
+            if(isLikedComment){
+                const unlikedComment = await this.commentRepo.unlikeComment(commentId, userId);
                 return {
                     message: "Unliked comment",
                     code: 200,
                     data: unlikedComment,
                 };
             }else{
-                const likedComment = await this.commentRepo.likeComment(id, userId);
+                const likedComment = await this.commentRepo.likeComment(commentId, userId);
                 return {
                     message: "Liked comment",
                     code: 200,
@@ -120,20 +128,4 @@ export default class CommentAction{
             throw new Errors.MoleculerError("Internal server error", 500);
         }
     };
-
-    // Helper actions
-    public pushNewCommentIdToParentComment = async (ctx: Context<any>): Promise<IApiResponse>=>{
-        try {
-            const {parentCommentId, newCommentId} = ctx.params;
-            const result = await this.commentRepo.pushNewCommentIdToParentComment(parentCommentId, newCommentId);
-            return {
-                message: "Pushed New Comment Id To Parent Comment",
-                code: 200,
-                data: result,
-            };
-        } catch (error) {
-            throw new Errors.MoleculerError("Internal server error", 500);
-        }
-    };
-
 }

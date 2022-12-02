@@ -13,7 +13,20 @@ export default class ApiService extends Service {
 			// More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html
 			settings: {
 				port: process.env.PORT || 3000,
-
+				cors: {
+					// Configures the Access-Control-Allow-Origin CORS header.
+					origin: "*",
+					// Configures the Access-Control-Allow-Methods CORS header.
+					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
+					// Configures the Access-Control-Allow-Headers CORS header.
+					allowedHeaders: "*",
+					// Configures the Access-Control-Expose-Headers CORS header.
+					exposedHeaders: "*",
+					// Configures the Access-Control-Allow-Credentials CORS header.
+					credentials: true,
+					// Configures the Access-Control-Max-Age CORS header.
+					maxAge: 24*60*60,
+				},
 				routes: [{
 					path: "/api",
 					whitelist: [

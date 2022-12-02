@@ -84,15 +84,6 @@ export default class PostService extends Service{
 					},
 					handler: this.postAct.unlikePost,
 				},
-
-				// Helper service
-				pushNewCommentIdToPost: {
-					rest: {
-						method: "PATCH",
-						path: "/helper/push-new-comment-id-to-post",
-					},
-					handler: this.postAct.pushNewCommentIdToPost,
-				},
 			},
 
 			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions

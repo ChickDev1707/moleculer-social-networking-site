@@ -24,13 +24,13 @@ export default class PostAction{
 
     public updatePost = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id, content, images}= ctx.params;
+            const {postId, content, images}= ctx.params;
             let updatedPost: any = null;
             if(images){
                 const imagesArray = images.split(",");
-                updatedPost = await this.postRepo.updatePost(id, content, imagesArray);
+                updatedPost = await this.postRepo.updatePost(postId, content, imagesArray);
             }else{
-                updatedPost = await this.postRepo.updatePost(id, content);
+                updatedPost = await this.postRepo.updatePost(postId, content);
             }
             return {
                 message: "Updated post",
@@ -44,8 +44,8 @@ export default class PostAction{
 
     public deletePost = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id} = ctx.params;
-            const deletedPost = await this.postRepo.deletePost(id);
+            const {postId} = ctx.params;
+            const deletedPost = await this.postRepo.deletePost(postId);
             return {
                 message: "Deleted post",
                 code: 200,
@@ -58,7 +58,11 @@ export default class PostAction{
 
     public getPosts = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const posts = await this.postRepo.getPosts();
+            // Call getUserById(ctx.params.userID) --> user
+            const user = {
+                following: ["637bb592cac1d671bfaf02d4"],
+            };
+            const posts = await this.postRepo.getPosts(user); // Chưa polupate với user
             return {
                 message: "Successful request",
                 code: 200,
@@ -71,8 +75,8 @@ export default class PostAction{
 
     public getPostsByUserId = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id} = ctx.params;
-            const posts = await this.postRepo.getPostByUserId(id);
+            const {userId} = ctx.params;
+            const posts = await this.postRepo.getPostByUserId(userId); // Chưa polupate với user
             return {
                 message: "Successful request",
                 code: 200,
@@ -85,8 +89,8 @@ export default class PostAction{
 
     public getPostsById = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id} = ctx.params;
-            const post = await this.postRepo.getPostById(id);
+            const {postId} = ctx.params;
+            const post = await this.postRepo.getPostById(postId); // Chưa polupate với user
             console.log(post);
             return {
                 message: "Successful request",
@@ -100,8 +104,8 @@ export default class PostAction{
 
     public likePost = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id, userId} = ctx.params;
-            const likedPost = await this.postRepo.likePost(id, userId);
+            const {postId, userId} = ctx.params;
+            const likedPost = await this.postRepo.likePost(postId, userId);
             return {
                 message: "Liked post",
                 code: 200,
@@ -114,27 +118,12 @@ export default class PostAction{
 
     public unlikePost = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const {id, userId} = ctx.params;
-            const unlikedPost = await this.postRepo.unlikePost(id, userId);
+            const {postId, userId} = ctx.params;
+            const unlikedPost = await this.postRepo.unlikePost(postId, userId);
             return {
                 message: "Unliked post",
                 code: 200,
                 data: unlikedPost,
-            };
-        } catch (error) {
-            throw new Errors.MoleculerError("Internal server error", 500);
-        }
-    };
-
-    // Helper action
-    public pushNewCommentIdToPost = async (ctx: Context<any>): Promise<IApiResponse>=>{
-        try {
-            const {id, commentId} = ctx.params;
-            const result = await this.postRepo.pushNewCommentIdToPost(id, commentId);
-            return {
-                message: "Push new comment to post",
-                code: 200,
-                data: result,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
