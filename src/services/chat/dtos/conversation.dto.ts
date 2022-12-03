@@ -1,12 +1,12 @@
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Types } from "mongoose";
 const { Schema, model } = mongoose;
 
 export interface IConversationDTO {
-    name: string;
+    name?: string;
     members: Types.Array<Types.ObjectId>;
     avatar?: string;
-    updatedAt: Date;
-    createdAt: Date;
+    updatedAt?: Date;
+    createdAt?: Date;
     createdBy: Types.ObjectId;
 }
 
@@ -22,18 +22,18 @@ export interface IMemberDTO {
 }
 
 export interface IResConversation {
-    _id: Types.ObjectId,
+    _id: Types.ObjectId;
     name: string;
-    members: Types.ObjectId[];
+    members: IUserInfo[];
     detailMembers: IUserInfo[];
     avatar?: string;
     updatedAt: Date;
     createdAt: Date;
-    createdBy: Types.ObjectId; 
+    createdBy: Types.ObjectId;
 }
 
 export interface IUserInfo {
     _id: Types.ObjectId;
-    name: String;
+    name: string;
     avatar?: string;
 }

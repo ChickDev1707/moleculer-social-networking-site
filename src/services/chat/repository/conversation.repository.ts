@@ -1,13 +1,15 @@
-import { IConversationDTO, IConversationOf2, IMemberDTO } from "../dtos/conversation.dto";
 import mongoose, { HydratedDocument, Types } from "mongoose";
-import conversationModel from "../models/conversation.model";
 import * as dotenv from "dotenv";
+import { IConversationDTO, IConversationOf2, IMemberDTO } from "../dtos/conversation.dto";
+import conversationModel from "../models/conversation.model";
 dotenv.config();
 
 export class ConversationRepository {
   public async create(conversation: IConversationDTO) {
-    const newConversation:HydratedDocument<IConversationDTO> = new conversationModel(conversation);
-    await newConversation.save()
+    conversation.createdAt = new Date();
+    conversation.updatedAt = new Date();
+    const newConversation: HydratedDocument<IConversationDTO> = new conversationModel(conversation);
+    await newConversation.save();
     return newConversation;
   }
 
@@ -23,20 +25,30 @@ export class ConversationRepository {
     return conversation;
   }
 
-  public async getConversationOfUser(userId: Types.ObjectId){
+  public async getConversationOfUser(userId: string){
     const conversations = await conversationModel.find({
 			members: userId,
 		});
     return conversations;
   }
 
-  public async addMember(newMemberData:IMemberDTO){
-    const conversation = await conversationModel.findByIdAndUpdate(newMemberData.conversation, {$push: {members: newMemberData.member}}, {new: true});
-    return conversation;    
+  public async updateConversationName(data: {id: string; newName: string}){
+    const conversation = await conversationModel.findByIdAndUpdate(data.id, {name: data.newName}, {new: true});
+    return conversation;
   }
 
-  public async removeMember(memberData:IMemberDTO){
+  public async updateConversationAvatar(data: {id: string; newAvatar: string}){
+    const conversation = await conversationModel.findByIdAndUpdate(data.id, {avatar: data.newAvatar}, {new: true});
+    return conversation;
+  }
+
+  public async addMember(newMemberData: IMemberDTO){
+    const conversation = await conversationModel.findByIdAndUpdate(newMemberData.conversation, {$push: {members: newMemberData.member}}, {new: true});
+    return conversation;
+  }
+
+  public async removeMember(memberData: IMemberDTO){
     const conversation = await conversationModel.findByIdAndUpdate(memberData.conversation, {$pull: {members: memberData.member}}, {new: true});
-    return conversation;    
+    return conversation;
   }
 }

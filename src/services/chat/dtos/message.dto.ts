@@ -4,24 +4,29 @@ import { IResConversation, IUserInfo } from "./conversation.dto";
 export interface IMessageDTO {
     conversation: Types.ObjectId;
     sender: Types.ObjectId;
-    content: String;
-    isDeleted: Boolean;
+    content: string;
+    isDeleted: boolean;
     seenBy: [Types.ObjectId];
     reactBy: [Types.ObjectId];
     updatedAt: Date;
-    createdAt: Date
+    createdAt: Date;
 }
 
 export interface INewMessageDTO {
     conversation: Types.ObjectId;
     sender: Types.ObjectId;
-    content: String;
+    content: string;
+}
+
+export interface IAnonymousMessageDTO {
+    conversation: Types.ObjectId;
+    content: string;
 }
 
 export interface IUpdateMessageDTO {
     id: Types.ObjectId;
     sender: Types.ObjectId;
-    content: String;
+    content: string;
 }
 
 export interface ISeenMessage {
@@ -45,21 +50,28 @@ export interface IResMessage {
     conversationDetails?: IResConversation;
     sender: Types.ObjectId;
     senderDetail?: IUserInfo;
-    content: String;
+    content: string;
     seenBy: [Types.ObjectId];
     seenByDetail: IUserInfo[];
     reactBy: [Types.ObjectId];
     reactByDetail: IUserInfo[];
     updatedAt: Date;
-    createdAt: Date
+    createdAt: Date;
+    isDeleted: boolean;
 }
 
-// import * as Joi from "@hapi/joi";
-// import "joi-extract-type";
+export interface ISeenConMessages {
+    id: string;
+    seenBy: string;
+}
 
-// const RegisterDtoSchema: any = Joi.object().keys({
-//   name: Joi.string().required(),
-//   gender: Joi.string().required(),
-//   dateOfBirth: Joi.date().required(),
-//   password: Joi.string().required(),
+
+// Import * as Joi from "@hapi/joi";
+// Import "joi-extract-type";
+
+// Const RegisterDtoSchema: any = Joi.object().keys({
+//   Name: Joi.string().required(),
+//   Gender: Joi.string().required(),
+//   DateOfBirth: Joi.date().required(),
+//   Password: Joi.string().required(),
 // });
