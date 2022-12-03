@@ -67,7 +67,6 @@ export default class CommentAction{
 
     public updateComment = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            console.log(ctx.params);
             if(!ctx.params.content){
                 return {
                     message: "Content is require",

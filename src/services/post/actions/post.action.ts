@@ -91,7 +91,6 @@ export default class PostAction{
         try {
             const {postId} = ctx.params;
             const post = await this.postRepo.getPostById(postId); // Chưa polupate với user
-            console.log(post);
             return {
                 message: "Successful request",
                 code: 200,
