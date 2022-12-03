@@ -2,7 +2,6 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 import * as dotenv from "dotenv";
 import { IPostDTO } from "../dtos/post.dto";
 import postModel from "../models/post.model";
-import { createTextChangeRange } from "typescript";
 
 dotenv.config();
 

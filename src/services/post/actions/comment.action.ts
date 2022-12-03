@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable capitalized-comments */
 import mongoose from "mongoose";
 const { Types }  = mongoose;
@@ -14,11 +15,24 @@ export default class CommentAction{
     public getcomments = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
             const {postId} = ctx.params;
-            const comments = await this.commentRepo.getComments(postId); // Chưa polupate với user
+            const comments: any = await this.commentRepo.getComments(postId); // Chưa polupate với user
+            const finalComments: any = [];
+            for (const comment of comments) {
+                const userInfo: any = await ctx.broker.call("users.getUser", {
+					userId: comment.user,
+				});
+                const obj1 = comment._doc;
+				const obj2 = {
+					userInfo: userInfo.data,
+				};
+				const finalComment = { ...obj1, ...obj2 };
+				finalComments.push(finalComment);
+            }
+            console.log(finalComments);
             return {
                 message: "Successful request",
                 code: 200,
-                data: comments,
+                data: finalComments,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
@@ -93,11 +107,11 @@ export default class CommentAction{
             const commentId = deletedComment.id;
             await this.postRepo.pullDeletedCommentIdInPost(postId, commentId);
             // Return new list comment
-            const newListComment = await this.commentRepo.getComments(postId);
+            const newListComment: any = await ctx.broker.call("comments.getComments", {postId });
             return {
                 message: "Deleted comment",
                 code: 200,
-                data: newListComment,
+                data: newListComment.data,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
