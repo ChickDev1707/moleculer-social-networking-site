@@ -65,3 +65,6 @@ typings/
 
 # Don't track transpiled files
 dist/
+
+# user data volume
+/docker/volumes/user/data

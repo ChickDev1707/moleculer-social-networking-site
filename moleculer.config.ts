@@ -128,7 +128,10 @@ module.exports = {
 	// Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
 	validator: new JoiValidator(),
 
-	errorHandler: null,
+	// Global error handler
+	errorHandler: (error: any) => {
+		console.log(error);
+	},
 
 	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
 	metrics: {
