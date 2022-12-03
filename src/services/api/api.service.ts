@@ -1,6 +1,9 @@
-import {IncomingMessage} from "http";
-import {Service, ServiceBroker, Context, Errors} from "moleculer";
+import { IncomingMessage, ServerResponse } from "http";
+import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import ApiGateway from "moleculer-web";
+import * as jwt from "jsonwebtoken";
+import { CustomJwtPayload } from "../user/types/jwt-payload.type";
+import { UserModel } from "../user/types/models";
 
 export default class ApiService extends Service {
 
@@ -48,7 +51,7 @@ export default class ApiService extends Service {
 					// The gateway will dynamically build the full routes from service schema.
 					autoAliases: true,
 
-					aliases:{},
+					aliases: {},
 					/**
 					 * Before call hook. You can check the request.
 					 * @param {Context} ctx
@@ -56,12 +59,15 @@ export default class ApiService extends Service {
 					 * @param {IncomingMessage} req
 					 * @param {ServerResponse} res
 					 * @param {Object} data
-					onBeforeCall(ctx: Context<any,{userAgent: string}>,
-					 route: object, req: IncomingMessage, res: ServerResponse) {
-					  Set request headers to context meta
-					  ctx.meta.userAgent = req.headers["user-agent"];
-					},
 					 */
+					onBeforeCall: (ctx: Context<any, { accessToken: string }>,
+						route: object, req: IncomingMessage, res: ServerResponse) => {
+						// Attach accessToken to ctx
+						const auth = req.headers.authorization;
+						if (auth && auth.startsWith("Bearer")) {
+							ctx.meta.accessToken = auth.slice(7);
+						}
+					},
 
 					/**
 					 * After call hook. You can modify the data.
@@ -109,6 +115,21 @@ export default class ApiService extends Service {
 					// Options to `server-static` module
 					options: {},
 				},
+				// Set up cors
+				cors: {
+					// Configures the Access-Control-Allow-Origin CORS header.
+					origin: "*",
+					// Configures the Access-Control-Allow-Methods CORS header.
+					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
+					// Configures the Access-Control-Allow-Headers CORS header.
+					allowedHeaders: "*",
+					// Configures the Access-Control-Expose-Headers CORS header.
+					exposedHeaders: [],
+					// Configures the Access-Control-Allow-Credentials CORS header.
+					credentials: false,
+					// Configures the Access-Control-Max-Age CORS header.
+					maxAge: 3600,
+				},
 			},
 
 			methods: {
@@ -125,25 +146,17 @@ export default class ApiService extends Service {
 				 * @returns {Promise}
 				 */
 
-				authenticate: async (ctx: Context, route: any, req: IncomingMessage): Promise <any> => {
+				authenticate: async (ctx: Context, route: any, req: IncomingMessage): Promise<any> => {
 					// Read the token from header
 					const auth = req.headers.authorization;
 					if (auth && auth.startsWith("Bearer")) {
-						const token = auth.slice(7);
+						const accessToken = auth.slice(7);
+						const token: CustomJwtPayload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET) as CustomJwtPayload;
 
-						// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
-						if (token === "123456") {
-							// Returns the resolved user. It will be set to the `ctx.meta.user`
-							return {
-								id: 1,
-								name: "John Doe",
-							};
-
-						} else {
-							// Invalid token
-							throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN, {
-								error: "Invalid Token",
-							});
+						const user: UserModel.User = await this.userRepo.findUserById(token.userId);
+						if (!user) {
+							// User in token is invalid
+							throw new Errors.MoleculerClientError("Unauthorized", 404);
 						}
 
 					} else {

@@ -27,6 +27,10 @@ On the welcome page you can test the generated services via API Gateway and chec
 - `npm run dc:up`: Start the stack with Docker Compose
 - `npm run dc:down`: Stop the stack with Docker Compose{{/docker}}
 
+## Run in dev mode
+- start docker: `docker-compose up -d`
+- run dev: `npm run dev`
+
 ## Project convention
 - naming variable/function/db property: use camel case (ex: camelCase)
 - naming enum: use upper case letter with underscore (ex: UPPERCASE_LETTER)

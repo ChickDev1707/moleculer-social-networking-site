@@ -1,7 +1,7 @@
 "use strict";
-import { Service, ServiceBroker} from "moleculer";
-import { CreateUserDtoSchema } from "./dtos/create-user.dto";
+import { Service, ServiceBroker } from "moleculer";
 import { UserAction } from "./actions/user.action";
+import { FollowingDtoSchema } from "./dtos/following.dto";
 import { LoginDtoSchema } from "./dtos/login.dto";
 import { RegisterDtoSchema } from "./dtos/register.dto";
 
@@ -15,18 +15,73 @@ export default class UserService extends Service {
 		this.parseServiceSchema({
 			name: "users",
 			actions: {
+				// Profile
 				/**
-				 * Create new user
-				 * @param {Number} params
+				 * Follow other users
+				 * @param {params} params
 				 */
-				create: {
+				getUser: {
 					rest: {
-						method: "POST",
-						path: "/",
+						method: "GET",
+						path: "/:userId",
 					},
-					params: CreateUserDtoSchema,
-					handler: this.userAction.createUser,
+					params: { userId: "string" },
+					handler: this.userAction.getUserInfo,
 				},
+				// Follow
+				/**
+				 * Follow other users
+				 * @param {params} params
+				 */
+				editFollowing: {
+					rest: {
+						method: "PATCH",
+						path: "/:userId/followings",
+					},
+					params: FollowingDtoSchema,
+					handler: this.userAction.editFollowing,
+				},
+
+				/**
+				 * Get followings list. “Following” is the term for the users who you follow.
+				 * @param {params} params
+				 */
+				getFollowings: {
+					rest: {
+						method: "GET",
+						path: "/:userId/followings",
+					},
+					params: { userId: "string" },
+					handler: this.userAction.getFollowings,
+				},
+
+				/**
+				 * Get followers list, "Followers" are the users who follow you
+				 * @param {params} params
+				 */
+				getFollowers: {
+					rest: {
+						method: "GET",
+						path: "/:userId/followers",
+					},
+					params: { userId: "string" },
+					handler: this.userAction.getFollowers,
+				},
+
+				/**
+				 * Get available user list - user who are either our follower or following
+				 * @param {params} params
+				 */
+				getAvailableUsers: {
+					rest: {
+						method: "GET",
+						path: "/:userId/recommend",
+					},
+					params: { userId: "string" },
+					handler: this.userAction.getAvailableUsers,
+				},
+
+				// Auth
 				login: {
 					rest: {
 						method: "POST",

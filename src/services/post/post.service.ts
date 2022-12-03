@@ -13,7 +13,6 @@ const fake = Fakerator();
 
 module.exports = {
 	name: "posts",
-	mixins: [DbService],
 	adapter: new MongooseDbAdapter(process.env.MONGODB_URI),
 	model: Post,
 	actions: {
