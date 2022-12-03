@@ -58,11 +58,9 @@ export default class PostAction{
 
     public getPosts = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            // Call getUserById(ctx.params.userID) --> user
-            const user = {
-                following: ["637bad328b8c922fa7392ed9", "637bb592cac1d671bfaf02d4"],
-            };
-            const posts = await this.postRepo.getPosts(user); // Chưa polupate với user
+            // Call getUserById(ctx.params.userId) --> user
+            const listFollowings: any = await ctx.broker.call("users.getFollowings", { userId: ctx.params.userId });
+            const posts = await this.postRepo.getPosts(listFollowings.data);
             return {
                 message: "Successful request",
                 code: 200,

@@ -2,6 +2,7 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 import * as dotenv from "dotenv";
 import { IPostDTO } from "../dtos/post.dto";
 import postModel from "../models/post.model";
+import { createTextChangeRange } from "typescript";
 
 dotenv.config();
 
@@ -39,10 +40,10 @@ export class PostRepository {
 		return deletedPost;
 	}
 
-	public async getPosts(user: any) {
-		let finalPosts: IPostDTO[] = [];
-		for (const userId of user.following) {
-			const posts = await postModel.find({ user: userId });
+	public async getPosts(listFollowings: any) {
+		let finalPosts: any[] = [];
+		for (const user of listFollowings) {
+			const posts = await postModel.find({ user: user.id });
 			finalPosts = [...finalPosts, ...posts];
 		}
 		finalPosts = finalPosts.sort(

@@ -4,8 +4,8 @@ const { Schema, model } = mongoose;
 export interface IPostDTO {
     content: string;
     images: string[];
-    likes: Types.Array<Types.ObjectId>;
+    likes: string[];
     comments: Types.Array<Types.ObjectId>;
-    user: Types.ObjectId;
+    user: string;
     createdAt: Date;
 }

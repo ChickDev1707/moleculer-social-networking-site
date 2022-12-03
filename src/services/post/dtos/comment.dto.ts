@@ -3,13 +3,13 @@ const { Schema, model } = mongoose;
 
 export interface ICommentDTO {
     content: string;
-    tag: Types.Array<Types.ObjectId>;
+    tag: string[];
     reply: Types.Array<Types.ObjectId>;
     parent: string;
-    likes: Types.Array<Types.ObjectId>;
-    user: Types.ObjectId;
+    likes: string[];
+    user: string;
     postId: Types.ObjectId;
-    postUserId: Types.ObjectId;
+    postUserId: string;
     createdAt: Date;
     modifiedAt: Date;
 }

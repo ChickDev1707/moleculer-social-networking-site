@@ -8,9 +8,9 @@ const postSchema = new Schema<IPostDTO>({
     default: "default content",
   },
   images: [{type: "String"}],
-  likes: [{type: Schema.Types.ObjectId}],
+  likes: [{type: "String"}],
   comments: [{type: Schema.Types.ObjectId}],
-  user: {type: Schema.Types.ObjectId},
+  user: "string",
   createdAt: {
     type: Date,
     default: Date.now,

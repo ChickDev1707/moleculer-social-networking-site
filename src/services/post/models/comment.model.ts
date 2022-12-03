@@ -5,13 +5,13 @@ import posts from "./post.model";
 
 const commentSchema = new Schema<ICommentDTO>({
     content: "string",
-    tag: [{type: Schema.Types.ObjectId}], // Ref users
+    tag: [{type: "String"}], // Ref users
     reply: [{type: Schema.Types.ObjectId, ref: "comments"}],
     parent: "string",
-    likes: [{type: Schema.Types.ObjectId}], // Ref users
-    user: {type: Schema.Types.ObjectId}, // Ref users
+    likes: [{type: "String"}], // Ref users
+    user: "string", // Ref users
     postId: {type: Schema.Types.ObjectId, ref: "posts"},
-    postUserId: {type: Schema.Types.ObjectId}, // REf users
+    postUserId: "string", // REf users
     createdAt: {
         type: Date,
         default: Date.now,

@@ -28,18 +28,18 @@ export class CommentRepository {
         return comments;
     }
 
-    public async likeComment(commentId: Types.ObjectId, userId: Types.ObjectId){
+    public async likeComment(commentId: Types.ObjectId, userId: string){
         const likedComment = await commentModel.findOneAndUpdate({_id: commentId}, {$push: {likes: userId}}, {new: true});
         return likedComment;
     }
 
-    public async unlikeComment(commentId: Types.ObjectId, userId: Types.ObjectId){
+    public async unlikeComment(commentId: Types.ObjectId, userId: string){
         const unlikedComment = await commentModel.findOneAndUpdate({_id: commentId}, {$pull: {likes: userId}}, {new: true});
         return unlikedComment;
     }
 
     // Helper
-    public async isLikedComment(commentId: Types.ObjectId, userId: Types.ObjectId){
+    public async isLikedComment(commentId: Types.ObjectId, userId: string){
         const checkComment = await commentModel.find({_id: commentId, likes: userId});
         if(checkComment.length > 0) {return true;}
         return false;
