@@ -6,6 +6,6 @@ export interface IPostDTO {
 	images: string[];
 	likes: string[];
 	comments: Types.Array<Types.ObjectId>;
-	userId: string;
+	user: string;
 	createdAt: Date;
 }

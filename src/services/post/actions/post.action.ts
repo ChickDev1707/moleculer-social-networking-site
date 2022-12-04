@@ -75,7 +75,7 @@ export default class PostAction {
 			const finalPosts: any = [];
 			for (const post of posts) {
 				const userInfo: any = await ctx.broker.call("users.getUser", {
-					userId: post.userId,
+					userId: post.user,
 				});
 				const obj1 = post._doc;
 				const obj2 = {
@@ -124,7 +124,7 @@ export default class PostAction {
 		try {
 			const { postId } = ctx.params;
 			const post: any = await this.postRepo.getPostById(postId); // Polupate với user
-			const userInfo: any = await ctx.broker.call("users.getUser", { userId: post.userId });
+			const userInfo: any = await ctx.broker.call("users.getUser", { userId: post.user });
 			const obj1 = post._doc;
 			const obj2 = {
 				userInfo: userInfo.data,

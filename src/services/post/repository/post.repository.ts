@@ -42,7 +42,7 @@ export class PostRepository {
 	public async getFollowingsPosts(listFollowings: any) {
 		let finalPosts: any[] = [];
 		for (const user of listFollowings) {
-			const posts = await postModel.find({ userId: user.id });
+			const posts = await postModel.find({ user: user.id });
 			finalPosts = [...finalPosts, ...posts];
 		}
 		finalPosts = finalPosts.sort(
@@ -52,7 +52,7 @@ export class PostRepository {
 	}
 
 	public async getUserPosts(userId: Types.ObjectId) {
-		const posts = await postModel.find({ userId });
+		const posts = await postModel.find({ user: userId });
 		return posts;
 	}
 
