@@ -1,6 +1,5 @@
 import { Service, ServiceBroker} from "moleculer";
 import mongoose from "mongoose";
-import ApiService from "moleculer-web";
 import MessageActionRest from "./actions/messageRest.action";
 
 export default class MessageService extends Service {
@@ -79,7 +78,7 @@ export default class MessageService extends Service {
             // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
             async started() {
 				try {
-					await mongoose.connect( process.env.MONGODB_URI);
+					await mongoose.connect( process.env.CHAT_DB_URI);
 					console.log("message service: connected to DB");
 				} catch (error) {
 					console.log("connect error");

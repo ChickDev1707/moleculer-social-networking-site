@@ -3,18 +3,18 @@ import { IResConversation, IUserInfo } from "./conversation.dto";
 
 export interface IMessageDTO {
     conversation: Types.ObjectId;
-    sender: Types.ObjectId;
+    sender: string;
     content: string;
     isDeleted: boolean;
-    seenBy: [Types.ObjectId];
-    reactBy: [Types.ObjectId];
+    seenBy: [string];
+    reactBy: [string];
     updatedAt: Date;
     createdAt: Date;
 }
 
 export interface INewMessageDTO {
     conversation: Types.ObjectId;
-    sender: Types.ObjectId;
+    sender: string;
     content: string;
 }
 
@@ -25,35 +25,35 @@ export interface IAnonymousMessageDTO {
 
 export interface IUpdateMessageDTO {
     id: Types.ObjectId;
-    sender: Types.ObjectId;
+    sender: string;
     content: string;
 }
 
 export interface ISeenMessage {
     id: Types.ObjectId;
-    seenBy: Types.ObjectId;
+    seenBy: string;
 }
 
 export interface IReactMessage {
     id: Types.ObjectId;
-    reactBy: Types.ObjectId;
+    reactBy: string;
 }
 
 export interface IDeleteMessageDTO {
     id: Types.ObjectId;
-    sender: Types.ObjectId;
+    sender: string;
 }
 
 export interface IResMessage {
     _id: Types.ObjectId;
     conversation: Types.ObjectId;
     conversationDetails?: IResConversation;
-    sender: Types.ObjectId;
+    sender: string;
     senderDetail?: IUserInfo;
     content: string;
-    seenBy: [Types.ObjectId];
+    seenBy: [string];
     seenByDetail: IUserInfo[];
-    reactBy: [Types.ObjectId];
+    reactBy: [string];
     reactByDetail: IUserInfo[];
     updatedAt: Date;
     createdAt: Date;

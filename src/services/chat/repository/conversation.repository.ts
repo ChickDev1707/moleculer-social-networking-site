@@ -6,11 +6,16 @@ dotenv.config();
 
 export class ConversationRepository {
   public async create(conversation: IConversationDTO) {
-    conversation.createdAt = new Date();
-    conversation.updatedAt = new Date();
-    const newConversation: HydratedDocument<IConversationDTO> = new conversationModel(conversation);
-    await newConversation.save();
-    return newConversation;
+    try {
+      conversation.createdAt = new Date();
+      conversation.updatedAt = new Date();
+      const newConversation: HydratedDocument<IConversationDTO> = new conversationModel(conversation);
+      await newConversation.save();
+      return newConversation;
+    } catch (error) {
+      console.log("errorrrrrrrrr", error);
+    }
+
   }
 
   public async getById(id: Types.ObjectId){

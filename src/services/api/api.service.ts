@@ -115,23 +115,7 @@ export default class ApiService extends Service {
 					// Options to `server-static` module
 					options: {},
 				},
-				// Set up cors
-				cors: {
-					// Configures the Access-Control-Allow-Origin CORS header.
-					origin: "*",
-					// Configures the Access-Control-Allow-Methods CORS header.
-					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
-					// Configures the Access-Control-Allow-Headers CORS header.
-					allowedHeaders: "*",
-					// Configures the Access-Control-Expose-Headers CORS header.
-					exposedHeaders: [],
-					// Configures the Access-Control-Allow-Credentials CORS header.
-					credentials: false,
-					// Configures the Access-Control-Max-Age CORS header.
-					maxAge: 3600,
-				},
 			},
-
 			methods: {
 				/**
 				 * Authenticate the request. It checks the `Authorization` token value in the request header.

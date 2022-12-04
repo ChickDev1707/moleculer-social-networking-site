@@ -55,9 +55,6 @@ services:
     ports:
       - 7474:7474
       - 7687:7687
-    volumes:
-      - ./docker/volumes/user/import:/import
-      - ./docker/volumes/user/data:/data
     env_file: docker-compose.env
     networks:
       - internal
@@ -67,6 +64,14 @@ services:
     container_name: post-db
     ports:
       - 5000:27017
+    networks:
+      - internal
+  
+  chat-db:
+    image: mongo:latest
+    container_name: chat-db
+    ports:
+      - 5002:27017
     networks:
       - internal
 

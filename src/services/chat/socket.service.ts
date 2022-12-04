@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 import { Errors, Service, ServiceBroker } from "moleculer";
-import mongoose from "mongoose";
 import SocketIOService from "moleculer-io";
-import { message } from "rhea-promise";
 
 export default class MessageService extends Service {
 	public constructor(public broker: ServiceBroker) {
@@ -64,8 +62,9 @@ export default class MessageService extends Service {
 												result.data
 											);
 										}
-									} catch {
+									} catch (error) {
 										socket.emit("error", "error");
+										console.log(error);
 										throw new Errors.MoleculerError(
 											"Internal server error",
 											500
@@ -102,20 +101,15 @@ export default class MessageService extends Service {
 										);
 									}
 								},
-								async leaveConversation(
-									data: any,
-									ack: any
-								) {
+								async leaveConversation(data: any, ack: any) {
 									const socket = this;
 									try {
-										console.log("Heollllllllllllllllllllllllllllllllllllllll");
 										const result =
 											await socket.$service.broker.call(
 												"conversation.removeMemberToConversation",
 												data
 											);
 										if (result.code === 201) {
-											console.log("broad castttttttttt");
 											socket.emit(
 												"leaveConversation",
 												result.data

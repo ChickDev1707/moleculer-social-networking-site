@@ -1,10 +1,7 @@
 import {Service, ServiceBroker, Context} from "moleculer";
-import DbService from "moleculer-db";
-import MongooseDbAdapter from "moleculer-db-adapter-mongoose";
 import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import ConversationAction  from "./actions/conversation.action";
-import conversationModel from "./models/conversation.model";
 dotenv.config();
 
 
@@ -106,7 +103,7 @@ export default class MessageService extends Service {
 			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 			async started(){
 				try {
-					await mongoose.connect( process.env.MONGODB_URI);
+					await mongoose.connect( process.env.CHAT_DB_URI);
 					console.log("conversation service: connected to DB");
 				} catch (error) {
 					console.log("connect error");

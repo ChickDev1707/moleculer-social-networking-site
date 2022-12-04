@@ -3,22 +3,22 @@ const { Schema, model } = mongoose;
 
 export interface IConversationDTO {
     name?: string;
-    members: Types.Array<Types.ObjectId>;
+    members: Types.Array<string>;
     avatar?: string;
     updatedAt?: Date;
     createdAt?: Date;
-    createdBy: Types.ObjectId;
+    createdBy: string;
 }
 
 export interface IConversationOf2 {
-    userId1: Types.ObjectId;
-    userId2?: Types.ObjectId;
+    userId1: string;
+    userId2?: string;
 }
 
 
 export interface IMemberDTO {
     conversation: Types.ObjectId;
-    member: Types.ObjectId;
+    member: string;
 }
 
 export interface IResConversation {
@@ -29,11 +29,11 @@ export interface IResConversation {
     avatar?: string;
     updatedAt: Date;
     createdAt: Date;
-    createdBy: Types.ObjectId;
+    createdBy: string;
 }
 
 export interface IUserInfo {
-    _id: Types.ObjectId;
+    id: string;
     name: string;
     avatar?: string;
 }

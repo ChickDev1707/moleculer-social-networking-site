@@ -22,12 +22,13 @@ export default class ConversationAction {
 			const newConversation = await this.conversationRepo.create(
 				ctx.params
 			);
-			// Call user service to get user info
-			const detailMembers = newConversation.members.map((mem, index) => ({
-				_id: mem,
-				name: "test" + index,
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			}));
+
+			const detailMembers: IUserInfo[] = await Promise.all(
+				newConversation.members.map(
+					async (mem: string, index: any) =>
+						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+				)
+			);
 
 			if (newConversation != null) {
 				this.messageRepo.createAnonymousMessage({
@@ -62,28 +63,26 @@ export default class ConversationAction {
 		ctx: Context<{ id: string; newName: string }>
 	): Promise<IApiResponse> => {
 		try {
-			const updateConversation =
+			const updatedConversation =
 				await this.conversationRepo.updateConversationName(ctx.params);
-			// Call user service to get user info
-			// Call User service to get user info
-			const detailMembers = updateConversation.members.map(
-				(mem, index) => ({
-					_id: mem,
-					name: "test" + index,
-					avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-				})
+
+			const detailMembers: IUserInfo[] = await Promise.all(
+				updatedConversation.members.map(
+					async (mem: string, index: any) =>
+						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+				)
 			);
 
 			const resConversation: IResConversation = {
 				// eslint-disable-next-line no-underscore-dangle
-				_id: updateConversation._id,
+				_id: updatedConversation._id,
 				members: detailMembers,
 				detailMembers,
-				name: updateConversation.name,
-				avatar: updateConversation.avatar,
-				createdAt: updateConversation.createdAt,
-				updatedAt: updateConversation.updatedAt,
-				createdBy: updateConversation.createdBy,
+				name: updatedConversation.name,
+				avatar: updatedConversation.avatar,
+				createdAt: updatedConversation.createdAt,
+				updatedAt: updatedConversation.updatedAt,
+				createdBy: updatedConversation.createdBy,
 			};
 
 			return {
@@ -100,30 +99,27 @@ export default class ConversationAction {
 		ctx: Context<{ id: string; newAvatar: string }>
 	): Promise<IApiResponse> => {
 		try {
-			const updateConversation =
-				await this.conversationRepo.updateConversationAvatar(
+			const updatedConversation = await this.conversationRepo.updateConversationAvatar(
 					ctx.params
 				);
-			// Call user service to get user info
-			// DetailMembers = await ctx.broker.call("");
-			const detailMembers: IUserInfo[] = updateConversation.members.map(
-				(mem, index) => ({
-					_id: mem,
-					name: "test" + index,
-					avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-				})
+
+			const detailMembers: IUserInfo[] = await Promise.all(
+				updatedConversation.members.map(
+					async (mem: string, index: any) =>
+						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+				)
 			);
 
 			const resConversation: IResConversation = {
 				// eslint-disable-next-line no-underscore-dangle
-				_id: updateConversation._id,
+				_id: updatedConversation._id,
 				members: detailMembers,
 				detailMembers,
-				name: updateConversation.name,
-				avatar: updateConversation.avatar,
-				createdAt: updateConversation.createdAt,
-				updatedAt: updateConversation.updatedAt,
-				createdBy: updateConversation.createdBy,
+				name: updatedConversation.name,
+				avatar: updatedConversation.avatar,
+				createdAt: updatedConversation.createdAt,
+				updatedAt: updatedConversation.updatedAt,
+				createdBy: updatedConversation.createdBy,
 			};
 
 			return {
@@ -138,10 +134,10 @@ export default class ConversationAction {
 
 	public getConversation = async (ctx: any): Promise<IApiResponse> => {
 		try {
-			// Const userId = ctx.call("", ctx.params.requestToken);
 			const conversation = await this.conversationRepo.getById(
 				ctx.params.id
 			);
+
 			if (conversation == null) {
 				return {
 					code: 404,
@@ -149,9 +145,14 @@ export default class ConversationAction {
 					data: null,
 				};
 			}
-			// Call User service to get user info
-			let detailMembers: IUserInfo[];
-			// DetailMembers = await ctx.broker.call("");
+
+			const detailMembers: IUserInfo[] = await Promise.all(
+				conversation.members.map(
+					async (mem: string, index: any) =>
+						(await ctx.broker.call("users.getUser", {userId: mem})).data as IUserInfo
+				)
+			);
+
 			const resConversation: IResConversation = {
 				// eslint-disable-next-line no-underscore-dangle
 				_id: conversation._id,
@@ -197,30 +198,20 @@ export default class ConversationAction {
 		return { code: 201, message: "", data: resConversation };
 	};
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering
 	public getConversationOfMine = async (ctx: any): Promise<IApiResponse> => {
 		try {
 			// Const userId = ctx.call("", ctx.params.requestToken);
 			const userId = ctx.params.userId;
-			if (userId == null || !isValidObjectId(userId)){
-				return { code: 404, message: "", data: null };
-			}
-			console.log(userId);
 			const conversations =
 				await this.conversationRepo.getConversationOfUser(userId);
 			const resConversations: IResConversation[] = [];
 
-			conversations.forEach((conversation: any) => {
-				// Call user service to get user info
-				// Let detailMembers: IUserInfo[];
-				// DetailMembers = await ctx.broker.call("");
-				// eslint-disable-next-line prefer-const
-				const detailMembers = conversation.members.map(
-					(mem: any, index: any) => ({
-						_id: mem,
-						name: "test" + index,
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					})
+			for (const conversation of conversations) {
+				const detailMembers = await Promise.all(
+					conversation.members.map(
+						async (mem: string, index: any) =>
+							(await ctx.broker.call("users.getUser", {userId: mem})).data as IUserInfo
+					)
 				);
 				const resConversation: IResConversation = {
 					// eslint-disable-next-line no-underscore-dangle
@@ -234,7 +225,7 @@ export default class ConversationAction {
 					createdBy: conversation.createdBy,
 				};
 				resConversations.push(resConversation);
-			});
+			}
 			return { code: 201, message: "", data: resConversations };
 		} catch (error) {
 			console.log(error);
@@ -247,17 +238,6 @@ export default class ConversationAction {
 		ctx: Context<IMemberDTO>
 	): Promise<IApiResponse> => {
 		try {
-			// Const existingUsers = await this.broker.call(
-			// 	"",
-			// 	[{  }]
-			// );
-
-			// If (!existingUsers) {
-			// 	Return {
-			// 		Succeeded: false,
-			// 		Message: "",
-			// 	};
-			// }
 			const conversation = await this.conversationRepo.getById(
 				ctx.params.conversation
 			);
@@ -282,15 +262,11 @@ export default class ConversationAction {
 				ctx.params
 			);
 
-			// // Call User service
-			// Let detailMembers: IUserInfo[];
-			// // DetailMembers = await ctx.broker.call("");
-
-			const detailMembers = conversation.members.map((mem, index) => ({
-				_id: new Types.ObjectId(),
-				name: "test" + index,
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			}));
+			const detailMembers = await Promise.all(
+				conversation.members.map(
+					async (mem: string, index: any) =>
+						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+				));
 
 			const resConversation: IResConversation = {
 				// eslint-disable-next-line no-underscore-dangle
@@ -319,29 +295,15 @@ export default class ConversationAction {
 		ctx: Context<IMemberDTO>
 	): Promise<IApiResponse> => {
 		try {
-			// Const existingUsers = await this.broker.call(
-			// 	"",
-			// 	[{  }]
-			// );
-
-			// If (!existingUsers) {
-			// 	Return {
-			// 		Succeeded: false,
-			// 		Message: "",
-			// 	};
-			// }
-
 			const updatedConversation =
 				await this.conversationRepo.removeMember(ctx.params);
 
 			// Call user service to get UserInfo
-			const detailMembers = updatedConversation.members.map(
-				(mem, index) => ({
-					_id: new Types.ObjectId(),
-					name: "test" + index,
-					avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-				})
-			);
+			const detailMembers = await Promise.all(
+				updatedConversation.members.map(
+					async (mem: string, index: any) =>
+						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+				));
 
 			const resConversation: IResConversation = {
 				// eslint-disable-next-line no-underscore-dangle

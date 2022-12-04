@@ -25,11 +25,11 @@ export default class MessageActionRest {
 			const newMessage = await this.messageRepo.create(ctx.params);
 
 			// SenderInfo = await ctx.broker.call("");
-			const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			};
+			const senderDetail = (
+				(await ctx.broker.call("users.getUser", {
+					userId: newMessage.sender,
+				})) as IApiResponse
+			).data as IUserInfo;
 
 			let conversationDetails: IResConversation;
 			// ConversationDetails = await ctx.broker.call("")
@@ -70,60 +70,55 @@ export default class MessageActionRest {
 			const updatedMessage = await this.messageRepo.deleteMessage(
 				ctx.params
 			);
-			const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
+			const senderDetail = (
+				(await ctx.broker.call("users.getUser", {
+					userId: updatedMessage.sender,
+				})) as IApiResponse
+			).data as IUserInfo;
+
+			const seenByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.seenBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const reactByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.reactBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const resMessage: IResMessage = {
+				// eslint-disable-next-line no-underscore-dangle
+				_id: updatedMessage._id,
+				conversation: updatedMessage.conversation,
+				sender: updatedMessage.sender,
+				senderDetail,
+				content: updatedMessage.content,
+				seenBy: updatedMessage.seenBy,
+				reactBy: updatedMessage.reactBy,
+				seenByDetail,
+				reactByDetail,
+				updatedAt: updatedMessage.updatedAt,
+				createdAt: updatedMessage.createdAt,
+				isDeleted: updatedMessage.isDeleted,
 			};
 
-			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
-
-			const seenByDetail: IUserInfo[] = updatedMessage.seenBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				}
-			);
-
-			const reactByDetail: IUserInfo[] = updatedMessage.reactBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// SenderInfo = await ctx.broker.call("");
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					return userInfo;
-				}
-			);
-
-      const resMessage: IResMessage = {
-        // eslint-disable-next-line no-underscore-dangle
-        _id: updatedMessage._id,
-        conversation: updatedMessage.conversation,
-        sender: updatedMessage.sender,
-        senderDetail,
-        content: updatedMessage.content,
-        seenBy: updatedMessage.seenBy,
-        reactBy: updatedMessage.reactBy,
-        seenByDetail,
-        reactByDetail,
-        updatedAt: updatedMessage.updatedAt,
-        createdAt: updatedMessage.createdAt,
-        isDeleted: updatedMessage.isDeleted,
-      };
-
-			return { code: 201, message: "Message was deleted", data: resMessage };
+			return {
+				code: 201,
+				message: "Message was deleted",
+				data: resMessage,
+			};
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);
 		}
@@ -177,43 +172,54 @@ export default class MessageActionRest {
 			const updatedMessage = await this.messageRepo.seenMessage(
 				ctx.params
 			);
-      const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
+			let senderDetail: IUserInfo;
+			if (updatedMessage.sender) {
+				senderDetail = (
+					(await ctx.broker.call("users.getUser", {
+						userId: updatedMessage.sender,
+					})) as IApiResponse
+				).data as IUserInfo;
+			}
+
+			const seenByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.seenBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const reactByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.reactBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const resMessage: IResMessage = {
+				// eslint-disable-next-line no-underscore-dangle
+				_id: updatedMessage._id,
+				conversation: updatedMessage.conversation,
+				sender: updatedMessage.sender,
+				senderDetail,
+				content: updatedMessage.content,
+				seenBy: updatedMessage.seenBy,
+				reactBy: updatedMessage.reactBy,
+				seenByDetail,
+				reactByDetail,
+				updatedAt: updatedMessage.updatedAt,
+				createdAt: updatedMessage.createdAt,
+				isDeleted: updatedMessage.isDeleted,
 			};
 
-			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
-
-			const seenByDetail: IUserInfo[] = updatedMessage.seenBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				}
-			);
-
-			const reactByDetail: IUserInfo[] = updatedMessage.reactBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// SenderInfo = await ctx.broker.call("");
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					return userInfo;
-				}
-			);
-			return { code: 201, message: "seen", data: updatedMessage };
+			return { code: 201, message: "seen", data: resMessage };
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);
 		}
@@ -223,45 +229,39 @@ export default class MessageActionRest {
 		ctx: Context<IReactMessage>
 	): Promise<IApiResponse> => {
 		try {
+			console.log(ctx.params);
 			const updatedMessage = await this.messageRepo.reactMessage(
 				ctx.params
 			);
-			const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			};
+			const senderDetail = (
+				(await ctx.broker.call("users.getUser", {
+					userId: updatedMessage.sender,
+				})) as IApiResponse
+			).data as IUserInfo;
+
+			const seenByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.seenBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const reactByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.reactBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
 
 			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
-
-			const seenByDetail: IUserInfo[] = updatedMessage.seenBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				}
-			);
-
-			const reactByDetail: IUserInfo[] = updatedMessage.reactBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// SenderInfo = await ctx.broker.call("");
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					return userInfo;
-				}
-			);
 
 			const resMessage: IResMessage = {
 				// eslint-disable-next-line no-underscore-dangle
@@ -292,58 +292,49 @@ export default class MessageActionRest {
 			const updatedMessage = await this.messageRepo.unReactMessage(
 				ctx.params
 			);
-      const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
+			const senderDetail = (
+				(await ctx.broker.call("users.getUser", {
+					userId: updatedMessage.sender,
+				})) as IApiResponse
+			).data as IUserInfo;
+
+			const seenByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.seenBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const reactByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.reactBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
+
+			const resMessage: IResMessage = {
+				// eslint-disable-next-line no-underscore-dangle
+				_id: updatedMessage._id,
+				conversation: updatedMessage.conversation,
+				sender: updatedMessage.sender,
+				senderDetail,
+				content: updatedMessage.content,
+				seenBy: updatedMessage.seenBy,
+				reactBy: updatedMessage.reactBy,
+				seenByDetail,
+				reactByDetail,
+				updatedAt: updatedMessage.updatedAt,
+				createdAt: updatedMessage.createdAt,
+				isDeleted: updatedMessage.isDeleted,
 			};
-
-			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
-
-			const seenByDetail: IUserInfo[] = updatedMessage.seenBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				}
-			);
-
-			const reactByDetail: IUserInfo[] = updatedMessage.reactBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// SenderInfo = await ctx.broker.call("");
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					return userInfo;
-				}
-			);
-
-      const resMessage: IResMessage = {
-        // eslint-disable-next-line no-underscore-dangle
-        _id: updatedMessage._id,
-        conversation: updatedMessage.conversation,
-        sender: updatedMessage.sender,
-        senderDetail,
-        content: updatedMessage.content,
-        seenBy: updatedMessage.seenBy,
-        reactBy: updatedMessage.reactBy,
-        seenByDetail,
-        reactByDetail,
-        updatedAt: updatedMessage.updatedAt,
-        createdAt: updatedMessage.createdAt,
-        isDeleted: updatedMessage.isDeleted,
-      };
 			return { code: 201, message: "Reacted", data: resMessage };
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);
@@ -359,59 +350,57 @@ export default class MessageActionRest {
 				ctx.params.page
 			);
 
-			const resMessages = messages.map((message: any) => {
-				let senderDetail: IUserInfo;
-				// eslint-disable-next-line prefer-const
-				senderDetail = {
-					_id: new Types.ObjectId(),
-					name: "test",
-					avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-				};
-				// SenderInfo = await ctx.broker.call("");
-
-				const seenByDetail: IUserInfo[] = message.seenBy.map((use: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				});
-
-				const reactByDetail: IUserInfo[] = message.reactBy.map(
-					(user: any) => {
-						let userInfo: IUserInfo;
-						// SenderInfo = await ctx.broker.call("");
-						// eslint-disable-next-line prefer-const
-						userInfo = {
-							_id: new Types.ObjectId(),
-							name: "test",
-							avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-						};
-						return userInfo;
+			const resMessages = await Promise.all(
+				messages.map(async (message: any) => {
+					let senderDetail: IUserInfo;
+					if (message.sender) {
+						senderDetail = (
+							(await ctx.broker.call("users.getUser", {
+								userId: message.sender,
+							})) as IApiResponse
+						).data as IUserInfo;
 					}
-				);
 
-				const resMessage: IResMessage = {
-					// eslint-disable-next-line no-underscore-dangle
-					_id: message._id,
-					conversation: message.conversation,
-					sender: message.sender,
-					senderDetail,
-					content: message.content,
-					seenBy: message.seenBy,
-					reactBy: message.reactBy,
-					seenByDetail,
-					reactByDetail,
-					updatedAt: message.updatedAt,
-					createdAt: message.createdAt,
-					isDeleted: message.isDeleted,
-				};
-				return resMessage;
-			});
+					const seenByDetail: IUserInfo[] = await Promise.all(
+						message.seenBy.map(
+							async (mem: string, index: any) =>
+								(
+									(await ctx.broker.call("users.getUser", {
+										userId: mem,
+									})) as IApiResponse
+								).data as IUserInfo
+						)
+					);
+
+					const reactByDetail: IUserInfo[] = await Promise.all(
+						message.reactBy.map(
+							async (mem: string, index: any) =>
+								(
+									(await ctx.broker.call("users.getUser", {
+										userId: mem,
+									})) as IApiResponse
+								).data as IUserInfo
+						)
+					);
+
+					const resMessage: IResMessage = {
+						// eslint-disable-next-line no-underscore-dangle
+						_id: message._id,
+						conversation: message.conversation,
+						sender: message.sender,
+						senderDetail,
+						content: message.content,
+						seenBy: message.seenBy,
+						reactBy: message.reactBy,
+						seenByDetail,
+						reactByDetail,
+						updatedAt: message.updatedAt,
+						createdAt: message.createdAt,
+						isDeleted: message.isDeleted,
+					};
+					return resMessage;
+				})
+			);
 
 			return { code: 201, message: "", data: resMessages };
 		} catch (error) {
@@ -423,59 +412,52 @@ export default class MessageActionRest {
 		ctx: Context<IDeleteMessageDTO>
 	): Promise<IApiResponse> => {
 		try {
-			const updatedMessage = await this.messageRepo.deleteMessage(ctx.params);
-			const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			};
+			const updatedMessage = await this.messageRepo.deleteMessage(
+				ctx.params
+			);
+			const senderDetail = (
+				(await ctx.broker.call("users.getUser", {
+					userId: updatedMessage.sender,
+				})) as IApiResponse
+			).data as IUserInfo;
 
-			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
-
-			const seenByDetail: IUserInfo[] = updatedMessage.seenBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				}
+			const seenByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.seenBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
 			);
 
-			const reactByDetail: IUserInfo[] = updatedMessage.reactBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// SenderInfo = await ctx.broker.call("");
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					return userInfo;
-				}
+			const reactByDetail: IUserInfo[] = await Promise.all(
+				updatedMessage.reactBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
 			);
 
 			const resMessage: IResMessage = {
-        // eslint-disable-next-line no-underscore-dangle
-        _id: updatedMessage._id,
-        conversation: updatedMessage.conversation,
-        sender: updatedMessage.sender,
-        senderDetail,
-        content: updatedMessage.content,
-        seenBy: updatedMessage.seenBy,
-        reactBy: updatedMessage.reactBy,
-        seenByDetail,
-        reactByDetail,
-        updatedAt: updatedMessage.updatedAt,
-        createdAt: updatedMessage.createdAt,
-        isDeleted: updatedMessage.isDeleted,
-      };
+				// eslint-disable-next-line no-underscore-dangle
+				_id: updatedMessage._id,
+				conversation: updatedMessage.conversation,
+				sender: updatedMessage.sender,
+				senderDetail,
+				content: updatedMessage.content,
+				seenBy: updatedMessage.seenBy,
+				reactBy: updatedMessage.reactBy,
+				seenByDetail,
+				reactByDetail,
+				updatedAt: updatedMessage.updatedAt,
+				createdAt: updatedMessage.createdAt,
+				isDeleted: updatedMessage.isDeleted,
+			};
 			return {
 				code: 201,
 				message: "Message was deleted",
@@ -491,16 +473,16 @@ export default class MessageActionRest {
 	): Promise<IApiResponse> => {
 		try {
 			const messages = await this.messageRepo.seenAllMessage(ctx.params);
-			// SenderInfo = await ctx.broker.call("");
-			const userInfo: IUserInfo = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			};
+			const seenUserInfo = (
+				(await ctx.broker.call("users.getUser", {
+					userId: ctx.params.seenBy,
+				})) as IApiResponse
+			).data as IUserInfo;
+
 			return {
 				code: 201,
 				message: "Message was deleted",
-				data: userInfo,
+				data: seenUserInfo,
 			};
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);
@@ -512,64 +494,59 @@ export default class MessageActionRest {
 	): Promise<IApiResponse> => {
 		try {
 			const messages = await this.messageRepo.getLastMessage(ctx.params);
-			const senderDetail = {
-				_id: new Types.ObjectId(),
-				name: "test",
-				avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-			};
-
-			if(messages == null || messages.length === 0)
-			{
+			if (messages.length === 0) {
 				return {
 					code: 201,
-					message: "success",
+					message: "Success",
 					data: null,
 				};
 			}
+			let senderDetail: IUserInfo;
+			if (messages[0].sender) {
+				senderDetail = (
+					(await ctx.broker.call("users.getUser", {
+						userId: messages[0].sender,
+					})) as IApiResponse
+				).data as IUserInfo;
+			}
 
-			const seenByDetail: IUserInfo[] = messages[0].seenBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					// SenderInfo = await ctx.broker.call("");
-					return userInfo;
-				}
+			const seenByDetail: IUserInfo[] = await Promise.all(
+				messages[0].seenBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
 			);
 
-			const reactByDetail: IUserInfo[] = messages[0].reactBy.map(
-				(user: any) => {
-					let userInfo: IUserInfo;
-					// SenderInfo = await ctx.broker.call("");
-					// eslint-disable-next-line prefer-const
-					userInfo = {
-						_id: new Types.ObjectId(),
-						name: "test",
-						avatar: "https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg",
-					};
-					return userInfo;
-				}
+			const reactByDetail: IUserInfo[] = await Promise.all(
+				messages[0].reactBy.map(
+					async (mem: string, index: any) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
 			);
 
 			const resMessage: IResMessage = {
-        // eslint-disable-next-line no-underscore-dangle
-        _id: messages[0]._id,
-        conversation: messages[0].conversation,
-        sender: messages[0].sender,
-        senderDetail,
-        content: messages[0].content,
-        seenBy: messages[0].seenBy,
-        reactBy: messages[0].reactBy,
-        seenByDetail,
-        reactByDetail,
-        updatedAt: messages[0].updatedAt,
-        createdAt: messages[0].createdAt,
-        isDeleted: messages[0].isDeleted,
-      };
+				// eslint-disable-next-line no-underscore-dangle
+				_id: messages[0]._id,
+				conversation: messages[0].conversation,
+				sender: messages[0].sender,
+				senderDetail,
+				content: messages[0].content,
+				seenBy: messages[0].seenBy,
+				reactBy: messages[0].reactBy,
+				seenByDetail,
+				reactByDetail,
+				updatedAt: messages[0].updatedAt,
+				createdAt: messages[0].createdAt,
+				isDeleted: messages[0].isDeleted,
+			};
 			return {
 				code: 201,
 				message: "Success",
