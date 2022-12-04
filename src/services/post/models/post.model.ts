@@ -10,7 +10,7 @@ const postSchema = new Schema<IPostDTO>({
   images: [{type: "String"}],
   likes: [{type: "String"}],
   comments: [{type: Schema.Types.ObjectId}],
-  user: "string",
+  userId: "string",
   createdAt: {
     type: Date,
     default: Date.now,

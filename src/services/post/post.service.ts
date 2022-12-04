@@ -1,25 +1,41 @@
 "use strict";
 
-import { Service, ServiceBroker, Context } from "moleculer";
-import DbService from "moleculer-db";
-import MongooseDbAdapter from "moleculer-db-adapter-mongoose";
+import { Service, ServiceBroker } from "moleculer";
 import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import PostAction from "./actions/post.action";
-import postModel from "./models/post.model";
 
 dotenv.config();
 
-export default class PostService extends Service{
+// Post service for user
+export default class PostService extends Service {
 	private postAct: PostAction;
 
-	public constructor(public broker: ServiceBroker){
+	public constructor(public broker: ServiceBroker) {
 		super(broker);
 		this.postAct = new PostAction();
 		this.parseServiceSchema({
 			name: "posts",
-			actions:{
+			actions: {
 				// Main service
+				// User post routes
+				getPost: {
+					rest: {
+						method: "GET",
+						path: "/",
+					},
+					params: { userId: "string" },
+					handler: this.postAct.getUserPosts,
+				},
+
+				getPostById: {
+					rest: {
+						method: "GET",
+						path: "/:id",
+					},
+					handler: this.postAct.getPostById,
+				},
+
 				createPost: {
 					rest: {
 						method: "POST",
@@ -31,48 +47,34 @@ export default class PostService extends Service{
 				updatePost: {
 					rest: {
 						method: "PATCH",
-						path:"/",
+						path: "/:id",
 					},
+					// Params
 					handler: this.postAct.updatePost,
 				},
 
 				deletePost: {
 					rest: {
 						method: "DELETE",
-						path: "/",
+						path: "/:id",
 					},
+					// Params
 					handler: this.postAct.deletePost,
 				},
-
-				getPosts: {
+				// Recommend post for user in home page
+				getHomePosts: {
 					rest: {
 						method: "GET",
-						path: "/",
+						path: "/home",
 					},
-					handler: this.postAct.getPosts,
+					params: { userId: "string" },
+					handler: this.postAct.getHomePosts,
 				},
-
-				getPostsByUserId: {
-					rest: {
-						method:"GET",
-						path: "/user",
-					},
-					handler: this.postAct.getPostsByUserId,
-
-				},
-
-				getPostsById: {
-					rest: {
-						method:"GET",
-						path: "/post",
-					},
-					handler: this.postAct.getPostsById,
-				},
-
+				// Post actions
 				likePost: {
 					rest: {
 						method: "PATCH",
-						path: "/post/like",
+						path: "/:id/like",
 					},
 					handler: this.postAct.likePost,
 				},
@@ -80,7 +82,7 @@ export default class PostService extends Service{
 				unlikePost: {
 					rest: {
 						method: "PATCH",
-						path: "/post/unlike",
+						path: "/:id/unlike",
 					},
 					handler: this.postAct.unlikePost,
 				},
