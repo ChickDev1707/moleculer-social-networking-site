@@ -7,6 +7,7 @@ import { v1 as uuidv1 } from "uuid";
 import { RegisterDto } from "../dtos/register.dto";
 import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
+import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
 
 const userDir = dirname(__dirname);
 dotenv.config();
@@ -72,6 +73,7 @@ export class UserRepository {
     const followings: UserModel.User[] = result.records.map((record: Record) => record.get("following").properties);
     return followings;
   }
+
   /**
    * Get list of people who are following us (followers);
    * @param userId
@@ -86,8 +88,9 @@ export class UserRepository {
     const followers: UserModel.User[] = result.records.map((record: Record) => record.get("follower").properties);
     return followers;
   }
+
   /**
-   * Get list of people who are following us (followers);
+   * Get list of people who we can follow
    * @param userId
    * @returns user[]
    */
@@ -108,6 +111,39 @@ export class UserRepository {
     return users;
   }
 
+  /**
+   * Get list of recommended users who we should follow
+   * @param userId
+   * @returns mutualFollowings[]
+   */
+  public async getRecommendedFollowings(userId: string): Promise<MutualFollowingsPayload[]> {
+    // Get current user followings id list
+    const followingId =
+      ` match (user:User {name: 'Ros'})-[:FOLLOW]->(following:User)
+        return collect(following.id) as followingList`;
+    const followingResult = await this.instance.cypher(followingId, {});
+    const followingList = followingResult.records[0].get("followingList");
+    // Get recommend base on current user's following list
+    // First, get related user who also follow current user followings and their followings as well called relatedFollowing
+    // Then, count the mutual followings, which are those who's in the current user's followings list
+    // Note: Make sure that related user are not in the current user followings list
+    const recommendQuery =
+      ` match (user:User {name: 'Ros'})-[:FOLLOW]->(following:User)<-[:FOLLOW]-(related:User)
+        with distinct related as r
+        match (r:User)-[:FOLLOW]->(relatedFollowing:User)
+        where not r.id in $followingList and relatedFollowing.id in $followingList
+        return distinct r as recommend, count(distinct relatedFollowing) as mutualCount
+        order by mutualCount desc limit 5`;
+    const recommendResult = await this.instance.cypher(recommendQuery, { followingList });
+    const mutualFollowings: MutualFollowingsPayload[] = recommendResult.records.map((record: Record) => (
+      {
+        user: record.get("recommend").properties,
+        mutualFollowings: record.get("mutualCount").low,
+      }
+    ));
+
+    return mutualFollowings;
+  }
 
   /**
    * Create the following relationship for two users
