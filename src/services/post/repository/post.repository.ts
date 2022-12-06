@@ -39,7 +39,7 @@ export class PostRepository {
 		return deletedPost;
 	}
 
-	public async getPosts(listFollowings: any) {
+	public async getFollowingsPosts(listFollowings: any) {
 		let finalPosts: any[] = [];
 		for (const user of listFollowings) {
 			const posts = await postModel.find({ user: user.id });
@@ -51,7 +51,7 @@ export class PostRepository {
 		return finalPosts;
 	}
 
-	public async getPostByUserId(userId: Types.ObjectId) {
+	public async getUserPosts(userId: Types.ObjectId) {
 		const posts = await postModel.find({ user: userId });
 		return posts;
 	}

@@ -63,14 +63,14 @@ export default class PostAction {
 		}
 	};
 
-	public getPosts = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public getHomePosts = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
 		try {
 			// Call getUserById(ctx.params.userId) --> user
 			const listFollowings: any = await ctx.broker.call(
 				"users.getFollowings",
 				{ userId: ctx.params.userId }
 			);
-			const posts = await this.postRepo.getPosts(listFollowings.data);
+			const posts = await this.postRepo.getFollowingsPosts(listFollowings.data);
 			// Populate userInfo -->post
 			const finalPosts: any = [];
 			for (const post of posts) {
@@ -98,12 +98,12 @@ export default class PostAction {
 		}
 	};
 
-	public getPostsByUserId = async (
+	public getUserPosts = async (
 		ctx: Context<any>
 	): Promise<IApiResponse> => {
 		try {
 			const { userId } = ctx.params;
-			const posts: any = await this.postRepo.getPostByUserId(userId); // Polupate với user
+			const posts: any = await this.postRepo.getUserPosts(userId); // Polupate với user
 			const finalPosts: any = [];
 			for (const post of posts) {
 				const userInfo: any = await ctx.broker.call("users.getUser", { userId });
@@ -124,7 +124,7 @@ export default class PostAction {
 		}
 	};
 
-	public getPostsById = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public getPostById = async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const { postId } = ctx.params;
 			const post: any = await this.postRepo.getPostById(postId); // Polupate với user
