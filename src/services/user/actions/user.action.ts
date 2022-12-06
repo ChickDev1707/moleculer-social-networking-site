@@ -11,6 +11,7 @@ import { handleError } from "../../../utils/erros.util";
 import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
+import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
 dotenv.config();
 
 export class UserAction {
@@ -149,6 +150,19 @@ export class UserAction {
       return {
         code: 200,
         message: "Get available users success",
+        data: users,
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  public getRecommendedFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+    try {
+      const users: MutualFollowingsPayload[] = await this.userRepo.getRecommendedFollowings(ctx.params.userId);
+      return {
+        code: 200,
+        message: "Get recommended users success",
         data: users,
       };
     } catch (error) {
