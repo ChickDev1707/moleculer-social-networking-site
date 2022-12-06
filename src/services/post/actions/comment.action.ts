@@ -15,7 +15,7 @@ export default class CommentAction{
     public getcomments = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
             const {postId} = ctx.params;
-            const comments: any = await this.commentRepo.getComments(postId); // Chưa polupate với user
+            const comments: any = await this.commentRepo.getComments(postId);
             const finalComments: any = [];
             for (const comment of comments) {
                 const userInfo: any = await ctx.broker.call("users.getUser", {

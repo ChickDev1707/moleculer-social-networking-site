@@ -1,10 +1,10 @@
 /* eslint-disable no-underscore-dangle */
 import mongoose from "mongoose";
-const { Types } = mongoose;
 import { Context, Errors } from "moleculer";
 import { IPostDTO } from "../dtos/post.dto";
 import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
+import { CreateUserDto } from "../../user/dtos/create-user.dto";
 
 export default class PostAction {
 	private postRepo = new PostRepository();
@@ -74,14 +74,18 @@ export default class PostAction {
 			// Populate userInfo -->post
 			const finalPosts: any = [];
 			for (const post of posts) {
-				const userInfo: any = await ctx.broker.call("users.getUser", {
+				const userInfo: IApiResponse = await ctx.broker.call("users.getUser", {
 					userId: post.user,
 				});
+				const listUserInfoLikedPost: IApiResponse = await ctx.broker.call("posts.getListUserInfoLikedPost", { postId: post._id});
+				const obj0 = {
+					listUserInfoLikedPost: listUserInfoLikedPost.data,
+				};
 				const obj1 = post._doc;
 				const obj2 = {
 					userInfo: userInfo.data,
 				};
-				const finalPost = { ...obj1, ...obj2 };
+				const finalPost = {...obj0, ...obj1, ...obj2 };
 				finalPosts.push(finalPost);
 			}
 			return {
@@ -162,6 +166,26 @@ export default class PostAction {
 				message: "Unliked post",
 				code: 200,
 				data: unlikedPost,
+			};
+		} catch (error) {
+			throw new Errors.MoleculerError("Internal server error", 500);
+		}
+	};
+
+	// ????????????
+	public getListUserInfoLikedPost = async (ctx: Context<any>): Promise<IApiResponse> => {
+		try {
+			const {postId} = ctx.params;
+			const post: IPostDTO = await this.postRepo.getPostById(postId);
+			const listUserInfo: CreateUserDto[] = [];
+			for (const userId of post.likes) {
+				const userInfo: IApiResponse = await ctx.broker.call("users.getUser", { userId });
+				listUserInfo.push(userInfo.data);
+			}
+			return {
+				message: "Get list-user-info-like-post successfully",
+				code: 200,
+				data: listUserInfo,
 			};
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);

@@ -84,6 +84,15 @@ export default class PostService extends Service{
 					},
 					handler: this.postAct.unlikePost,
 				},
+
+				getListUserInfoLikedPost: {
+					rest: {
+						method: "GET",
+						path: "/post/:postId/list-user-info-like-post",
+					},
+					params: {postId: "string"},
+					handler: this.postAct.getListUserInfoLikedPost,
+				},
 			},
 
 			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
