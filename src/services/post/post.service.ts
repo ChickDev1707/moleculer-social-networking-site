@@ -4,22 +4,32 @@ import { Service, ServiceBroker } from "moleculer";
 import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import PostAction from "./actions/post.action";
+import CommentAction from "./actions/comment.action";
 
 dotenv.config();
 
-// Post service for user
 export default class PostService extends Service {
 	private postAct: PostAction;
-
+	private commentAct: CommentAction;
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
 		this.postAct = new PostAction();
+		this.commentAct = new CommentAction();
 		this.parseServiceSchema({
 			name: "posts",
 			actions: {
-				// Main service
-				// User post routes
-				getPost: {
+				// Post service
+				// Recommend post for user in home page
+				getHomePosts: {
+					rest: {
+						method: "GET",
+						path: "/home",
+					},
+					params: { userId: "string" },
+					handler: this.postAct.getHomePosts,
+				},
+				// Get all post of a user
+				getUserPosts: {
 					rest: {
 						method: "GET",
 						path: "/",
@@ -31,8 +41,9 @@ export default class PostService extends Service {
 				getPostById: {
 					rest: {
 						method: "GET",
-						path: "/:id",
+						path: "/:postId",
 					},
+					params: { postId: "string"},
 					handler: this.postAct.getPostById,
 				},
 
@@ -47,56 +58,107 @@ export default class PostService extends Service {
 				updatePost: {
 					rest: {
 						method: "PATCH",
-						path: "/:id",
+						path: "/:postId",
 					},
-					// Params
+					params: { postId: "string"},
 					handler: this.postAct.updatePost,
 				},
 
 				deletePost: {
 					rest: {
 						method: "DELETE",
-						path: "/:id",
+						path: "/:postId",
 					},
-					// Params
+					params: { postId: "string"},
 					handler: this.postAct.deletePost,
 				},
-				// Recommend post for user in home page
-				getHomePosts: {
-					rest: {
-						method: "GET",
-						path: "/home",
-					},
-					params: { userId: "string" },
-					handler: this.postAct.getHomePosts,
-				},
-				// Post actions
+
 				likePost: {
 					rest: {
 						method: "PATCH",
-						path: "/:id/like",
+						path: "/:postId/like",
 					},
+					params: { postId: "string"},
 					handler: this.postAct.likePost,
 				},
 
 				unlikePost: {
 					rest: {
 						method: "PATCH",
-						path: "/:id/unlike",
+						path: "/:postId/unlike",
 					},
+					params: { postId: "string"},
 					handler: this.postAct.unlikePost,
 				},
 
-				getListUserInfoLikedPost: {
+				// Comment service
+				// Get all comments of a post
+				getPostComments: {
 					rest: {
-						method: "GET",
-						path: "/post/:postId/list-user-info-like-post",
+						method:"GET",
+						path: "/:postId/comments",
 					},
-					params: {postId: "string"},
-					handler: this.postAct.getListUserInfoLikedPost,
+					params: { postId: "string"},
+					handler: this.commentAct.getPostcomments,
+				},
+
+				createComment:{
+					rest: {
+						method: "POST",
+						path: "/:postId/comments",
+					},
+					params: { postId: "string"},
+					handler: this.commentAct.createComment,
+				},
+
+				updateComment: {
+					rest: {
+						method: "PATCH",
+						path: "/:postId/comments/:commentId",
+					},
+					params: {
+						postId: "string",
+						commentId: "string",
+					},
+					handler: this.commentAct.updateComment,
+				},
+
+				deleteComment: {
+					rest: {
+						method: "DELETE",
+						path: "/:postId/comments/:commentId",
+					},
+					params: {
+						postId: "string",
+						commentId: "string",
+					},
+					handler: this.commentAct.deleteComment,
+				},
+
+				likeComment: {
+					rest: {
+						method: "PATCH",
+						path: "/:postId/comments/:commentId/like",
+					},
+					params: {
+						postId: "string",
+						commentId: "string",
+					},
+					handler: this.commentAct.likeComment,
+				},
+
+				unlikeComment: {
+					rest: {
+						method: "PATCH",
+						path: "/:postId/comments/:commentId/unlike",
+					},
+					params: {
+						postId: "string",
+						commentId: "string",
+					},
+					handler: this.commentAct.unlikeComment,
 				},
 			},
-
 			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 			async started(): Promise<void> {
 				try {

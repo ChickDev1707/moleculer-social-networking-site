@@ -23,8 +23,8 @@ export class CommentRepository {
         return deletedComment;
     }
 
-    public async getComments(postId: Types.ObjectId){
-        const comments = await commentModel.find({postId, parent: "x"}).populate("reply"); // Chưa populate với user
+    public async getPostComments(postId: Types.ObjectId){
+        const comments = await commentModel.find({postId, parent: "x"}).populate("reply");
         return comments;
     }
 

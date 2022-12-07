@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable capitalized-comments */
 import mongoose from "mongoose";
 const { Types }  = mongoose;
 import { BrokerNode, Context, Errors, ServiceBroker  } from "moleculer";
@@ -12,23 +11,14 @@ export default class CommentAction{
     private commentRepo = new CommentRepository();
     private postRepo = new PostRepository();
 
-    public getcomments = async (ctx: Context<any>): Promise<IApiResponse>=>{
+    public getPostcomments = async (ctx: Context<any>): Promise<IApiResponse> => {
         try {
-            const {postId} = ctx.params;
-            const comments: any = await this.commentRepo.getComments(postId);
-            const finalComments: any = [];
+            const comments: ICommentDTO[] = await this.commentRepo.getPostComments(ctx.params.postId);
+            const finalComments = [];
             for (const comment of comments) {
-                const userInfo: any = await ctx.broker.call("users.getUser", {
-					userId: comment.user,
-				});
-                const obj1 = comment._doc;
-				const obj2 = {
-					userInfo: userInfo.data,
-				};
-				const finalComment = { ...obj1, ...obj2 };
+				const finalComment = await getFullDetailComment(ctx, comment);
 				finalComments.push(finalComment);
             }
-            console.log(finalComments);
             return {
                 message: "Successful request",
                 code: 200,
@@ -49,12 +39,12 @@ export default class CommentAction{
             };
             const commentTemp: ICommentDTO = {
                 content: ctx.params.content,
+                user: ctx.params.userId,
+                postId: ctx.params.postId,
                 tag: ctx.params.tag ? ctx.params.tag : [],
                 reply: ctx.params.reply ? ctx.params.reply : [],
                 parent: ctx.params.parentCommentId ? ctx.params.parentCommentId : "x",
                 likes: ctx.params.likes?ctx.params.likes: [],
-                user: ctx.params.userId,
-                postId: ctx.params.postId,
                 postUserId: ctx.params.postUserId,
                 createdAt: new Date((new Date()).getTime()),
                 modifiedAt: new Date((new Date()).getTime()),
@@ -69,10 +59,12 @@ export default class CommentAction{
                 const parentCommentId = ctx.params.parentCommentId;
                 await this.commentRepo.pushNewCommentIdToParentComment(parentCommentId, commentId);
             };
+            // Popupate user
+            const finalNewComment = await getFullDetailComment(ctx, newComment);
             return {
                 message: "Successful request",
                 code: 200,
-                data: newComment,
+                data: finalNewComment,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
@@ -101,44 +93,60 @@ export default class CommentAction{
 
     public deleteComment = async (ctx: Context<any>): Promise<IApiResponse>=>{
         try {
-            const deletedComment = await this.commentRepo.deleteComment(ctx.params.commentId);
-            // Delete commentId in post-->comments
-            const postId = ctx.params.postId;
-            const commentId = deletedComment.id;
+            const {postId, commentId} = ctx.params;
+            const deletedComment = await this.commentRepo.deleteComment(commentId);
+            // Delete commentId in post
             await this.postRepo.pullDeletedCommentIdInPost(postId, commentId);
-            // Return new list comment
-            const newListComment: any = await ctx.broker.call("comments.getComments", {postId });
             return {
                 message: "Deleted comment",
                 code: 200,
-                data: newListComment.data,
+                data: deletedComment,
             };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
         }
     };
 
-    public reactComment = async (ctx: Context<any>): Promise<IApiResponse>=>{
+    public likeComment = async (ctx: Context<any>): Promise<IApiResponse> => {
         try {
-            const {commentId, userId} = ctx.params;
-            const isLikedComment = await this.commentRepo.isLikedComment(commentId, userId);
-            if(isLikedComment){
-                const unlikedComment = await this.commentRepo.unlikeComment(commentId, userId);
-                return {
-                    message: "Unliked comment",
-                    code: 200,
-                    data: unlikedComment,
-                };
-            }else{
-                const likedComment = await this.commentRepo.likeComment(commentId, userId);
-                return {
-                    message: "Liked comment",
-                    code: 200,
-                    data: likedComment,
-                };
-            }
+            const { userId, commentId } = ctx.params;
+            const likedComment = await this.commentRepo.likeComment(commentId, userId);
+            return {
+                message: "liked comment",
+                code: 200,
+                data: likedComment,
+            };
+        } catch (error) {
+            throw new Errors.MoleculerError("Internal server error", 500);
+        }
+    };
+
+    public unlikeComment = async (ctx: Context<any>): Promise<IApiResponse> => {
+        try {
+            const { userId, commentId } = ctx.params;
+            const unlikedComment = await this.commentRepo.unlikeComment(commentId, userId);
+            return {
+                message: "Unliked comment",
+                code: 200,
+                data: unlikedComment,
+            };
         } catch (error) {
             throw new Errors.MoleculerError("Internal server error", 500);
         }
     };
 }
+
+// Sub function
+export const getFullDetailComment = async (ctx: any, comment: any) => {
+    try {
+        // Get user info
+        const userInfoResponse: IApiResponse = await ctx.broker.call("users.getUser", { userId: comment.user });
+        // Return final comment
+        const finalComment = {
+            ...comment._doc,
+            ...{user: userInfoResponse.data}};
+        return finalComment;
+    } catch (error) {
+        throw new Errors.MoleculerError("Internal server error", 500);
+    }
+};

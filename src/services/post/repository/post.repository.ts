@@ -51,7 +51,7 @@ export class PostRepository {
 		return finalPosts;
 	}
 
-	public async getUserPosts(userId: Types.ObjectId) {
+	public async getUserPosts(userId: string) {
 		const posts = await postModel.find({ user: userId });
 		return posts;
 	}
