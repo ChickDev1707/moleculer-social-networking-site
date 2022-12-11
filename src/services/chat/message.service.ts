@@ -11,6 +11,9 @@ export default class MessageService extends Service {
 		this.parseServiceSchema({
 			name: "messages",
 			actions: {
+				/**
+				 * Create user message
+				 */
 				createRest: {
 					rest: {
 						method: "POST",

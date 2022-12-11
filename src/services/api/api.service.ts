@@ -18,7 +18,7 @@ export default class ApiService extends Service {
 				port: process.env.PORT || 3000,
 				cors: {
 					// Configures the Access-Control-Allow-Origin CORS header.
-					origin: "http://localhost:3008",
+					origin: "*",
 					// Configures the Access-Control-Allow-Methods CORS header.
 					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
 					// Configures the Access-Control-Allow-Headers CORS header.

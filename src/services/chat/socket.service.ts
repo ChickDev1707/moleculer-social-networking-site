@@ -16,9 +16,11 @@ export default class MessageService extends Service {
 				logClientConnection: "warn",
 				logBroadcastRequest: "warn",
 				cors: {
-					origin: ["http://localhost:3008", "*"],
+					origin: "*",
 					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "*"],
-					allowedHeaders: [],
+					allowedHeaders: [
+						"Access-Control-Allow-Origin", "*",
+					],
 					exposedHeaders: [],
 					credentials: false,
 					maxAge: 3600,

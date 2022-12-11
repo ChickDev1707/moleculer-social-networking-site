@@ -14,12 +14,30 @@ export default class MessageService extends Service {
 		this.parseServiceSchema({
 			name: "conversations",
 			actions: {
+				/**
+				 * Create conversation for  a user
+				 */
 				createConversation: {
 					rest: {
 						method: "POST",
 						path: "/",
 					},
 					handler: this.conversationAct.createConversation,
+				},
+				/**
+				 * Get conversations of a specific user by user id
+				 * @param userId
+				 * @return conversations[]
+				 */
+				getUserConversations: {
+					rest: {
+						method: "GET",
+						path: "/",
+					},
+					params: {
+						userId: "string",
+					},
+					handler: this.conversationAct.getUserConversations,
 				},
 				getConversationById: {
 					rest: {
@@ -28,24 +46,17 @@ export default class MessageService extends Service {
 					},
 					handler: this.conversationAct.getConversation,
 				},
-				getConversationOfMine: {
-					rest: {
-						method: "GET",
-						path: "/",
-					},
-					handler: this.conversationAct.getConversationOfMine,
-				},
 				updateConversationName: {
 					rest: {
 						method: "PATCH",
-						path: "/:id/Name",
+						path: "/:id/name",
 					},
 					handler: this.conversationAct.updateConversationName,
 				},
 				updateConversationAvatar: {
 					rest: {
 						method: "PATCH",
-						path: "/:id/Avatar",
+						path: "/:id/avatar",
 					},
 					handler: this.conversationAct.updateConversationAvatar,
 				},

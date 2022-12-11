@@ -209,7 +209,7 @@ export default class ConversationAction {
 		return { code: 201, message: "", data: resConversation };
 	};
 
-	public getConversationOfMine = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+	public getUserConversations = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
 		try {
 			// Const userId = ctx.call("", ctx.params.requestToken);
 			const userId = ctx.params.userId;
