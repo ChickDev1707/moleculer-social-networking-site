@@ -1,18 +1,22 @@
-import {Schema, model} from "mongoose";
+import mongoose, { Types } from "mongoose";
+const { Schema, model } = mongoose;
+import { IPostDTO } from "../dtos/post.dto";
 
-const postSchema = new Schema({
-  title: String,
-  content: String,
-  // Images: [{
-  //   Type: String,
-  //   Required: true
-  // }],
-  // Likes: [{ type: mongoose.Types.ObjectId, ref: 'users' }],
-  // Comments: [{ type: mongoose.Types.ObjectId, ref: 'comments' }],
-  // User: {type: mongoose.Types.ObjectId, ref: 'users'},
+const postSchema = new Schema<IPostDTO>({
+  content: {
+    type: "String",
+    default: "default content",
+  },
+  images: [{type: "String"}],
+  likes: [{type: "String"}],
+  comments: [{type: Schema.Types.ObjectId}],
+  user: {
+    type: "String",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
-}, {collection: "posts"});
+});
+
 export default model("posts", postSchema);

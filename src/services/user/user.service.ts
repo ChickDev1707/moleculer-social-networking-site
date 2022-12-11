@@ -69,16 +69,16 @@ export default class UserService extends Service {
 				},
 
 				/**
-				 * Get available user list - user who are either our follower or following
+				 * Get recommended followings
 				 * @param {params} params
 				 */
-				getAvailableUsers: {
+				 getRecommendedFollowings: {
 					rest: {
 						method: "GET",
 						path: "/:userId/recommend",
 					},
 					params: { userId: "string" },
-					handler: this.userAction.getAvailableUsers,
+					handler: this.userAction.getRecommendedFollowings,
 				},
 
 				// Auth

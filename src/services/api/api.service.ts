@@ -22,13 +22,13 @@ export default class ApiService extends Service {
 					// Configures the Access-Control-Allow-Methods CORS header.
 					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
 					// Configures the Access-Control-Allow-Headers CORS header.
-					allowedHeaders: ["Access-Control-Allow-Origin", "*"],
+					allowedHeaders: "*",
 					// Configures the Access-Control-Expose-Headers CORS header.
-					exposedHeaders: [],
+					exposedHeaders: "*",
 					// Configures the Access-Control-Allow-Credentials CORS header.
-					credentials: false,
+					credentials: true,
 					// Configures the Access-Control-Max-Age CORS header.
-					maxAge: 3600,
+					maxAge: 24*60*60,
 				},
 				routes: [{
 					path: "/api",

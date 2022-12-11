@@ -5,17 +5,32 @@ module.exports = {
   },
   name: {
     type: "string",
+    required: true,
+  },
+  gender: {
+    type: "string",
+    required: true,
+  },
+  dateOfBirth: {
+    type: "date",
+    required: true,
+  },
+  email: {
+    type: "string",
+  },
+  phoneNumber: {
+    type: "string",
+  },
+  address: {
+    type: "string",
   },
   avatar: {
     type: "string",
   },
-  gender: {
+  followers: {
     type: "string",
   },
-  dateOfBirth: {
-    type: "date",
-  },
-  address: {
+  followings: {
     type: "string",
   },
 };
