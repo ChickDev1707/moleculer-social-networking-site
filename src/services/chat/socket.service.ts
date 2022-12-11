@@ -1,7 +1,9 @@
-/* eslint-disable @typescript-eslint/quotes */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
+/* eslint-disable no-underscore-dangle */
 import { Errors, Service, ServiceBroker } from "moleculer";
 import SocketIOService from "moleculer-io";
+import { IApiResponse } from "../../../configs/api.type";
+import { IConversationDTO, IMemberDTO, IResConversation, IUserInfo } from "./dtos/conversation.dto";
+import { INewMessageDTO, ISeenConMessages } from "./dtos/message.dto";
 
 export default class MessageService extends Service {
 	public constructor(public broker: ServiceBroker) {
@@ -14,7 +16,7 @@ export default class MessageService extends Service {
 				logClientConnection: "warn",
 				logBroadcastRequest: "warn",
 				cors: {
-					origin: ["http://localhost:3006", "*"],
+					origin: ["http://localhost:3008", "*"],
 					methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE", "*"],
 					allowedHeaders: [],
 					exposedHeaders: [],
@@ -27,40 +29,27 @@ export default class MessageService extends Service {
 							events: {
 								call: {
 									whitelist: [
-										"conversation.*",
+										"conversations.*",
 										"socketServer.*",
 										"rooms.*",
 										"io.*",
 									],
-									async onBeforeCall(
-										ctx: any,
-										socket: any,
-										action: any,
-										params: any,
-										callOptions: any
-									) {
-										ctx.meta.socketid = socket.id;
-										ctx.meta.action = action;
-										console.log("before hook:", params);
-									},
 								},
-								async createConversation(data: any, ack: any) {
+								async createConversation(data: IConversationDTO) {
 									const socket = this;
 									try {
 										const result =
 											await socket.$service.broker.call(
-												"conversation.createConversation",
+												"conversations.createConversation",
 												data
-											);
+											) as IApiResponse;
 										if (result.code === 201) {
-											socket.emit(
-												"newConversation",
-												result.data
-											);
-											socket.broadcast.emit(
-												"newConversation",
-												result.data
-											);
+											let socketRooms = socket.server;
+											result.data.members.forEach((mem: IUserInfo) => {
+												console.log("conversation member", mem);
+												socketRooms = socketRooms.to(mem.id);
+											});
+											socketRooms.emit("newConversation", result.data);
 										}
 									} catch (error) {
 										socket.emit("error", "error");
@@ -72,9 +61,8 @@ export default class MessageService extends Service {
 									}
 								},
 								async updateConversation(
-									action: any,
-									data: any,
-									ack: any
+									action: string,
+									data: any
 								) {
 									const socket = this;
 									try {
@@ -84,14 +72,16 @@ export default class MessageService extends Service {
 												data
 											);
 										if (result.code === 201) {
-											socket.emit(
-												"updateConversation",
-												result.data
-											);
-											socket.broadcast.emit(
-												"updateConversation",
-												result.data
-											);
+											// socket.emit(
+											// 	"updateConversation",
+											// 	result.data
+											// );
+											// socket.broadcast.emit(
+											// 	"updateConversation",
+											// 	result.data
+											// );
+											socket.server.to(result.data._id.toString()).emit("updateConversation", result.data);
+
 										}
 									} catch {
 										socket.emit("error", "error");
@@ -101,23 +91,16 @@ export default class MessageService extends Service {
 										);
 									}
 								},
-								async leaveConversation(data: any, ack: any) {
+								async leaveConversation(data: IMemberDTO) {
 									const socket = this;
 									try {
 										const result =
 											await socket.$service.broker.call(
-												"conversation.removeMemberToConversation",
+												"conversations.removeMemberToConversation",
 												data
-											);
+											) as IApiResponse;
 										if (result.code === 201) {
-											socket.emit(
-												"leaveConversation",
-												result.data
-											);
-											socket.broadcast.emit(
-												"leaveConversation",
-												result.data
-											);
+											socket.server.to(result.data._id.toString()).emit("leaveConversation", result.data);
 										}
 									} catch {
 										socket.emit("error", "error");
@@ -127,7 +110,7 @@ export default class MessageService extends Service {
 										);
 									}
 								},
-								async seenAllMessage(data: any, ack: any) {
+								async seenAllMessage(data: ISeenConMessages) {
 									const socket = this;
 									try {
 										const result =
@@ -140,6 +123,7 @@ export default class MessageService extends Service {
 												"seenAllMessage",
 												result.data
 											);
+											socket.server.to(result.data.conversation.toString()).emit("updateMessage", result.data);
 										}
 									} catch {
 										socket.emit("error", "error");
@@ -149,7 +133,7 @@ export default class MessageService extends Service {
 										);
 									}
 								},
-								async createMessage(data: any, ack: any) {
+								async createMessage(data: INewMessageDTO) {
 									const socket = this;
 									try {
 										const result =
@@ -158,14 +142,7 @@ export default class MessageService extends Service {
 												data
 											);
 										if (result.code === 201) {
-											socket.emit(
-												"newMessage",
-												result.data
-											);
-											socket.broadcast.emit(
-												"newMessage",
-												result.data
-											);
+											socket.server.to(result.data.conversation.toString()).emit("newMessage", result.data);
 										}
 									} catch (error) {
 										console.log(error);
@@ -177,9 +154,8 @@ export default class MessageService extends Service {
 									}
 								},
 								async updateMessage(
-									action: any,
-									data: any,
-									ack: any
+									action: string,
+									data: any
 								) {
 									const socket = this;
 									try {
@@ -189,15 +165,7 @@ export default class MessageService extends Service {
 												data
 											);
 										if (result.code === 201) {
-											console.log("result", result.data);
-											socket.emit(
-												"updateMessage",
-												result.data
-											);
-											socket.broadcast.emit(
-												"newMessage",
-												result.data
-											);
+											socket.server.to(result.data.conversation.toString()).emit("updateMessage", result.data);
 										}
 									} catch {
 										socket.emit("error", "error");

@@ -1,5 +1,6 @@
+/* eslint-disable no-underscore-dangle */
 import { Context, Errors } from "moleculer";
-import mongoose, { isValidObjectId, Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import {
 	IConversationDTO,
 	IConversationOf2,
@@ -25,8 +26,12 @@ export default class ConversationAction {
 
 			const detailMembers: IUserInfo[] = await Promise.all(
 				newConversation.members.map(
-					async (mem: string, index: any) =>
-						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+					async (mem: string) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
 				)
 			);
 
@@ -38,7 +43,6 @@ export default class ConversationAction {
 			}
 
 			const resConversation: IResConversation = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: newConversation._id,
 				members: detailMembers,
 				detailMembers,
@@ -68,13 +72,16 @@ export default class ConversationAction {
 
 			const detailMembers: IUserInfo[] = await Promise.all(
 				updatedConversation.members.map(
-					async (mem: string, index: any) =>
-						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+					async (mem: string) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
 				)
 			);
 
 			const resConversation: IResConversation = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedConversation._id,
 				members: detailMembers,
 				detailMembers,
@@ -99,19 +106,23 @@ export default class ConversationAction {
 		ctx: Context<{ id: string; newAvatar: string }>
 	): Promise<IApiResponse> => {
 		try {
-			const updatedConversation = await this.conversationRepo.updateConversationAvatar(
+			const updatedConversation =
+				await this.conversationRepo.updateConversationAvatar(
 					ctx.params
 				);
 
 			const detailMembers: IUserInfo[] = await Promise.all(
 				updatedConversation.members.map(
-					async (mem: string, index: any) =>
-						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
+					async (mem: string) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
 				)
 			);
 
 			const resConversation: IResConversation = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedConversation._id,
 				members: detailMembers,
 				detailMembers,
@@ -132,7 +143,7 @@ export default class ConversationAction {
 		}
 	};
 
-	public getConversation = async (ctx: any): Promise<IApiResponse> => {
+	public getConversation = async (ctx: Context<{ id: mongoose.Types.ObjectId }>): Promise<IApiResponse> => {
 		try {
 			const conversation = await this.conversationRepo.getById(
 				ctx.params.id
@@ -148,13 +159,16 @@ export default class ConversationAction {
 
 			const detailMembers: IUserInfo[] = await Promise.all(
 				conversation.members.map(
-					async (mem: string, index: any) =>
-						(await ctx.broker.call("users.getUser", {userId: mem})).data as IUserInfo
+					async (mem: string) =>
+						(
+							await ctx.broker.call("users.getUser", {
+								userId: mem,
+							}) as IApiResponse
+						).data as IUserInfo
 				)
 			);
 
 			const resConversation: IResConversation = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: conversation._id,
 				members: detailMembers,
 				detailMembers,
@@ -170,7 +184,6 @@ export default class ConversationAction {
 		}
 	};
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering
 	public getConversationOfTwoUser = async (
 		ctx: Context<IConversationOf2>
 	): Promise<IApiResponse> => {
@@ -183,9 +196,7 @@ export default class ConversationAction {
 
 		// Call User service to get user info
 		let detailMembers: IUserInfo[];
-		// DetailMembers = await ctx.broker.call("");
 		const resConversation: IResConversation = {
-			// eslint-disable-next-line no-underscore-dangle
 			_id: conversation._id,
 			members: detailMembers,
 			detailMembers,
@@ -198,7 +209,7 @@ export default class ConversationAction {
 		return { code: 201, message: "", data: resConversation };
 	};
 
-	public getConversationOfMine = async (ctx: any): Promise<IApiResponse> => {
+	public getConversationOfMine = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
 		try {
 			// Const userId = ctx.call("", ctx.params.requestToken);
 			const userId = ctx.params.userId;
@@ -209,12 +220,15 @@ export default class ConversationAction {
 			for (const conversation of conversations) {
 				const detailMembers = await Promise.all(
 					conversation.members.map(
-						async (mem: string, index: any) =>
-							(await ctx.broker.call("users.getUser", {userId: mem})).data as IUserInfo
+						async (mem: string) =>
+							(
+								await ctx.broker.call("users.getUser", {
+									userId: mem,
+								}) as IApiResponse
+							).data as IUserInfo
 					)
 				);
 				const resConversation: IResConversation = {
-					// eslint-disable-next-line no-underscore-dangle
 					_id: conversation._id,
 					members: detailMembers,
 					detailMembers,
@@ -264,12 +278,16 @@ export default class ConversationAction {
 
 			const detailMembers = await Promise.all(
 				conversation.members.map(
-					async (mem: string, index: any) =>
-						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
-				));
+					async (mem: string) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
 
 			const resConversation: IResConversation = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: conversation._id,
 				members: detailMembers,
 				detailMembers,
@@ -290,7 +308,6 @@ export default class ConversationAction {
 		}
 	};
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering
 	public removeMember = async (
 		ctx: Context<IMemberDTO>
 	): Promise<IApiResponse> => {
@@ -301,12 +318,16 @@ export default class ConversationAction {
 			// Call user service to get UserInfo
 			const detailMembers = await Promise.all(
 				updatedConversation.members.map(
-					async (mem: string, index: any) =>
-						(await ctx.broker.call("users.getUser", {userId: mem}) as IApiResponse).data as IUserInfo
-				));
+					async (mem: string) =>
+						(
+							(await ctx.broker.call("users.getUser", {
+								userId: mem,
+							})) as IApiResponse
+						).data as IUserInfo
+				)
+			);
 
 			const resConversation: IResConversation = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedConversation._id,
 				members: detailMembers,
 				detailMembers,

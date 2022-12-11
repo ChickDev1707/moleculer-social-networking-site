@@ -1,4 +1,4 @@
-import { Service, ServiceBroker} from "moleculer";
+import { Service, ServiceBroker } from "moleculer";
 
 export default class MessageService extends Service {
 	public constructor(public broker: ServiceBroker) {
@@ -6,16 +6,16 @@ export default class MessageService extends Service {
 		this.parseServiceSchema({
 			name: "rooms",
 			actions: {
-                join: {
-                    handler: (ctx: any) => {
-                        ctx.meta.$join = ctx.params.join;
-                    },
-                },
-                leave: {
-                    handler: (ctx: any) => {
-                        ctx.meta.$leave = ctx.params.leave;
-                    },
-                },
+				join: {
+					handler: ctx => {
+						ctx.meta.$join = ctx.params.join;
+					},
+				},
+				leave: {
+					handler: ctx => {
+						ctx.meta.$leave = ctx.params.leave;
+					},
+				},
 			},
 		});
 	}

@@ -103,8 +103,8 @@ export class MessageRepository {
 		return updatedMessage;
 	}
 
-	public async getLastMessage(data: any) {
-		const message = await messageModel.find({ conversation: data.conversationId })
+	public async getLastMessage(conversationId: string) {
+		const message = await messageModel.find({ conversation: conversationId })
 			.sort({ createdAt: -1 })
 			.skip(0)
 			.limit(1);

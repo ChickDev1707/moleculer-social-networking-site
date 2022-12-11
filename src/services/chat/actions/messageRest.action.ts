@@ -1,5 +1,6 @@
+/* eslint-disable no-underscore-dangle */
 import { Context, Errors } from "moleculer";
-import { Types } from "mongoose";
+import mongoose from "mongoose";
 import { IResConversation, IUserInfo } from "../dtos/conversation.dto";
 import { MessageRepository } from "../repository/message.repository";
 import {
@@ -16,15 +17,12 @@ import { IApiResponse } from "../../../../configs/api.type";
 
 export default class MessageActionRest {
 	private messageRepo = new MessageRepository();
-	private conversationRepo = new ConversationRepository();
 
 	public createMessage = async (
 		ctx: Context<INewMessageDTO>
 	): Promise<IApiResponse> => {
 		try {
 			const newMessage = await this.messageRepo.create(ctx.params);
-
-			// SenderInfo = await ctx.broker.call("");
 			const senderDetail = (
 				(await ctx.broker.call("users.getUser", {
 					userId: newMessage.sender,
@@ -32,10 +30,8 @@ export default class MessageActionRest {
 			).data as IUserInfo;
 
 			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: newMessage._id,
 				conversation: newMessage.conversation,
 				conversationDetails,
@@ -59,7 +55,6 @@ export default class MessageActionRest {
 		} catch (error) {
 			console.log(error);
 			return { code: 500, message: "Server error", data: null };
-			// Throw new Errors.MoleculerError("Internal server error", 500);
 		}
 	};
 
@@ -78,7 +73,7 @@ export default class MessageActionRest {
 
 			const seenByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.seenBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -89,7 +84,7 @@ export default class MessageActionRest {
 
 			const reactByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.reactBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -99,7 +94,6 @@ export default class MessageActionRest {
 			);
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedMessage._id,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
@@ -133,13 +127,9 @@ export default class MessageActionRest {
 			);
 
 			let senderDetail: IUserInfo;
-			// SenderInfo = await ctx.broker.call("");
-
 			let conversationDetails: IResConversation;
-			// ConversationDetails = await ctx.broker.call("")
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedMessage._id,
 				conversation: updatedMessage.conversation,
 				conversationDetails,
@@ -183,7 +173,7 @@ export default class MessageActionRest {
 
 			const seenByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.seenBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -194,7 +184,7 @@ export default class MessageActionRest {
 
 			const reactByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.reactBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -204,7 +194,6 @@ export default class MessageActionRest {
 			);
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedMessage._id,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
@@ -241,7 +230,7 @@ export default class MessageActionRest {
 
 			const seenByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.seenBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -252,7 +241,7 @@ export default class MessageActionRest {
 
 			const reactByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.reactBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -264,7 +253,6 @@ export default class MessageActionRest {
 			let conversationDetails: IResConversation;
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedMessage._id,
 				conversation: updatedMessage.conversation,
 				conversationDetails,
@@ -300,7 +288,7 @@ export default class MessageActionRest {
 
 			const seenByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.seenBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -311,7 +299,7 @@ export default class MessageActionRest {
 
 			const reactByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.reactBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -321,7 +309,6 @@ export default class MessageActionRest {
 			);
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedMessage._id,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
@@ -342,7 +329,7 @@ export default class MessageActionRest {
 	};
 
 	public getConversationMessages = async (
-		ctx: any
+		ctx: Context<{conversationId: mongoose.Types.ObjectId; page: number}>
 	): Promise<IApiResponse> => {
 		try {
 			const messages = await this.messageRepo.getMessageOfConversation(
@@ -351,7 +338,7 @@ export default class MessageActionRest {
 			);
 
 			const resMessages = await Promise.all(
-				messages.map(async (message: any) => {
+				messages.map(async message => {
 					let senderDetail: IUserInfo;
 					if (message.sender) {
 						senderDetail = (
@@ -363,7 +350,7 @@ export default class MessageActionRest {
 
 					const seenByDetail: IUserInfo[] = await Promise.all(
 						message.seenBy.map(
-							async (mem: string, index: any) =>
+							async (mem: string) =>
 								(
 									(await ctx.broker.call("users.getUser", {
 										userId: mem,
@@ -374,7 +361,7 @@ export default class MessageActionRest {
 
 					const reactByDetail: IUserInfo[] = await Promise.all(
 						message.reactBy.map(
-							async (mem: string, index: any) =>
+							async (mem: string) =>
 								(
 									(await ctx.broker.call("users.getUser", {
 										userId: mem,
@@ -384,7 +371,6 @@ export default class MessageActionRest {
 					);
 
 					const resMessage: IResMessage = {
-						// eslint-disable-next-line no-underscore-dangle
 						_id: message._id,
 						conversation: message.conversation,
 						sender: message.sender,
@@ -423,7 +409,7 @@ export default class MessageActionRest {
 
 			const seenByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.seenBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -434,7 +420,7 @@ export default class MessageActionRest {
 
 			const reactByDetail: IUserInfo[] = await Promise.all(
 				updatedMessage.reactBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -444,7 +430,6 @@ export default class MessageActionRest {
 			);
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: updatedMessage._id,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
@@ -490,10 +475,10 @@ export default class MessageActionRest {
 	};
 
 	public getLastMessage = async (
-		ctx: Context<string>
+		ctx: Context<{conversationId: string}>
 	): Promise<IApiResponse> => {
 		try {
-			const messages = await this.messageRepo.getLastMessage(ctx.params);
+			const messages = await this.messageRepo.getLastMessage(ctx.params.conversationId);
 			if (messages.length === 0) {
 				return {
 					code: 201,
@@ -512,7 +497,7 @@ export default class MessageActionRest {
 
 			const seenByDetail: IUserInfo[] = await Promise.all(
 				messages[0].seenBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -523,7 +508,7 @@ export default class MessageActionRest {
 
 			const reactByDetail: IUserInfo[] = await Promise.all(
 				messages[0].reactBy.map(
-					async (mem: string, index: any) =>
+					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
@@ -533,7 +518,6 @@ export default class MessageActionRest {
 			);
 
 			const resMessage: IResMessage = {
-				// eslint-disable-next-line no-underscore-dangle
 				_id: messages[0]._id,
 				conversation: messages[0].conversation,
 				sender: messages[0].sender,

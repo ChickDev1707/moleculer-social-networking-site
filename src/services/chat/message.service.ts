@@ -1,4 +1,4 @@
-import { Service, ServiceBroker} from "moleculer";
+import { Service, ServiceBroker } from "moleculer";
 import mongoose from "mongoose";
 import MessageActionRest from "./actions/messageRest.action";
 
@@ -11,74 +11,73 @@ export default class MessageService extends Service {
 		this.parseServiceSchema({
 			name: "messages",
 			actions: {
-                createRest: {
-                    rest: {
-                        method: "POST",
-                        path: "/",
-                    },
+				createRest: {
+					rest: {
+						method: "POST",
+						path: "/",
+					},
 					handler: this.messageAction.createMessage,
-                },
-                seenRest: {
-                    rest: {
-                        method: "POST",
-                        path: "/seen",
-                    },
-                    handler: this.messageAction.seenMessage,
-                },
-                seenAllRest: {
-                    rest: {
-                        method: "PUT",
-                        path: "/seenAll",
-                    },
-                    handler: this.messageAction.seenAllMessage,
-                },
-                reactMessage: {
-                    rest: {
-                        method: "PUT",
-                        path: "/react",
-                    },
-                    handler: this.messageAction.reactMessage,
-                },
-                unReactMessage: {
-                    rest: {
-                        method: "PUT",
-                        path: "/unReact",
-                    },
-                    handler: this.messageAction.unReactMessage,
-                },
-                deleteRest: {
-                    rest: {
-                        method: "PUT",
-                        path: "/:id/delete",
-                    },
-                    handler: this.messageAction.DeleteMessage,
-                },
-                updateRest: {
-                    rest: {
-                        method: "PUT",
-                        path: "/:id",
-                    },
-                    handler: this.messageAction.updateMessage,
-                },
-                getConversationLastMessage: {
-                    rest: {
-                        method: "GET",
-                        path: "/:conversationId/last",
-                    },
-                    handler: this.messageAction.getLastMessage,
-                },
-                getConversationMessages: {
-                    rest: {
-                        method: "GET",
-                        path: "/:conversationId",
-                    },
-                    handler: this.messageAction.getConversationMessages,
-                },
+				},
+				seenRest: {
+					rest: {
+						method: "POST",
+						path: "/seen",
+					},
+					handler: this.messageAction.seenMessage,
+				},
+				seenAllRest: {
+					rest: {
+						method: "PATCH",
+						path: "/seenAll",
+					},
+					handler: this.messageAction.seenAllMessage,
+				},
+				reactMessage: {
+					rest: {
+						method: "PATCH",
+						path: "/react",
+					},
+					handler: this.messageAction.reactMessage,
+				},
+				unReactMessage: {
+					rest: {
+						method: "PATCH",
+						path: "/unReact",
+					},
+					handler: this.messageAction.unReactMessage,
+				},
+				deleteRest: {
+					rest: {
+						method: "PATCH",
+						path: "/:id/delete",
+					},
+					handler: this.messageAction.DeleteMessage,
+				},
+				updateRest: {
+					rest: {
+						method: "PUT",
+						path: "/:id",
+					},
+					handler: this.messageAction.updateMessage,
+				},
+				getConversationLastMessage: {
+					rest: {
+						method: "GET",
+						path: "/LastMessage",
+					},
+					handler: this.messageAction.getLastMessage,
+				},
+				getConversationMessages: {
+					rest: {
+						method: "GET",
+						path: "/",
+					},
+					handler: this.messageAction.getConversationMessages,
+				},
 			},
-            // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-            async started() {
+			started: async () => {
 				try {
-					await mongoose.connect( process.env.CHAT_DB_URI);
+					await mongoose.connect(process.env.CHAT_DB_URI);
 					console.log("message service: connected to DB");
 				} catch (error) {
 					console.log("connect error");
