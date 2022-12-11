@@ -11,6 +11,13 @@ On the welcome page you can test the generated services via API Gateway and chec
 ## Services
 - **api**: API Gateway services
 - **user**: user and account service for login/register
+
+## port to use:
+- user-db: 7474/7687
+- chat-db: 5002
+- post-db: 5000
+- chat-socket-io: 30003
+
 ## Useful links
 
 * Moleculer website: https://moleculer.services/

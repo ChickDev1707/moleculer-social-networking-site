@@ -116,7 +116,6 @@ export default class ApiService extends Service {
 					options: {},
 				},
 			},
-
 			methods: {
 				/**
 				 * Authenticate the request. It checks the `Authorization` token value in the request header.
