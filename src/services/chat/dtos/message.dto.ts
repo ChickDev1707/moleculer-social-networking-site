@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
-import { IResConversation, IUserInfo } from "./conversation.dto";
+import { UserModel } from "../../user/types/models";
+import { IResConversation } from "./conversation.dto";
 
 export interface IMessageDTO {
 	conversation: Types.ObjectId;
@@ -49,12 +50,12 @@ export interface IResMessage {
 	conversation: Types.ObjectId;
 	conversationDetails?: IResConversation;
 	sender: string;
-	senderDetail?: IUserInfo;
+	senderDetail?: UserModel.User;
 	content: string;
 	seenBy: [string];
-	seenByDetail: IUserInfo[];
+	seenByDetail: UserModel.User[];
 	reactBy: [string];
-	reactByDetail: IUserInfo[];
+	reactByDetail: UserModel.User[];
 	updatedAt: Date;
 	createdAt: Date;
 	isDeleted: boolean;

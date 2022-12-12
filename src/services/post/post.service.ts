@@ -2,19 +2,17 @@
 
 import { Service, ServiceBroker } from "moleculer";
 import * as dotenv from "dotenv";
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 import PostAction from "./actions/post.action";
 import CommentAction from "./actions/comment.action";
-
 dotenv.config();
 
 export default class PostService extends Service {
-	private postAct: PostAction;
-	private commentAct: CommentAction;
+	private dbConnection: Connection = mongoose.createConnection(process.env.POST_DB_URI);
+	private postAct: PostAction = new PostAction(this.dbConnection);
+	private commentAct: CommentAction = new CommentAction(this.dbConnection);
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
-		this.postAct = new PostAction();
-		this.commentAct = new CommentAction();
 		this.parseServiceSchema({
 			name: "posts",
 			actions: {
@@ -159,13 +157,9 @@ export default class PostService extends Service {
 					handler: this.commentAct.unlikeComment,
 				},
 			},
-			// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-			async started(): Promise<void> {
-				try {
-					await mongoose.connect(process.env.MONGODB_URI);
-				} catch (error) {
-					console.log(error);
-				}
+			stopped: () => {
+				this.dbConnection.close();
+				this.logger.info("post service: disconnect DB");
 			},
 		});
 	}

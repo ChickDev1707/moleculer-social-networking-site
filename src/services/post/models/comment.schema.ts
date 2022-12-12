@@ -1,9 +1,8 @@
-import mongoose, { Types } from "mongoose";
-const { Schema, model } = mongoose;
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 import { ICommentDTO } from "../dtos/comment.dto";
-import posts from "./post.model";
 
-const commentSchema = new Schema<ICommentDTO>({
+const CommentSchema = new Schema<ICommentDTO>({
     content: "string",
     tag: [{type: "String"}], // Ref users
     reply: [{type: Schema.Types.ObjectId, ref: "comments"}],
@@ -22,4 +21,4 @@ const commentSchema = new Schema<ICommentDTO>({
     },
 });
 
-export default model("comments", commentSchema);
+export default CommentSchema;

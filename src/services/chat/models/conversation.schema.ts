@@ -1,8 +1,8 @@
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { IConversationDTO } from "../dtos/conversation.dto";
-const { Schema, model } = mongoose;
+const { Schema } = mongoose;
 
-const conversationSchema = new Schema<IConversationDTO>({
+const ConversationSchema = new Schema<IConversationDTO>({
 	name: {
 		type: "String",
 		default: "",
@@ -29,4 +29,4 @@ const conversationSchema = new Schema<IConversationDTO>({
 	},
 });
 
-export default model("conversations", conversationSchema);
+export default ConversationSchema;

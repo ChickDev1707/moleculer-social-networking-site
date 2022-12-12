@@ -2,7 +2,8 @@
 import { Errors, Service, ServiceBroker } from "moleculer";
 import SocketIOService from "moleculer-io";
 import { IApiResponse } from "../../../configs/api.type";
-import { IConversationDTO, IMemberDTO, IResConversation, IUserInfo } from "./dtos/conversation.dto";
+import { UserModel } from "../user/types/models";
+import { IConversationDTO, IMemberDTO } from "./dtos/conversation.dto";
 import { INewMessageDTO, ISeenConMessages } from "./dtos/message.dto";
 
 export default class MessageService extends Service {
@@ -47,7 +48,7 @@ export default class MessageService extends Service {
 											) as IApiResponse;
 										if (result.code === 201) {
 											let socketRooms = socket.server;
-											result.data.members.forEach((mem: IUserInfo) => {
+											result.data.members.forEach((mem: UserModel.User) => {
 												console.log("conversation member", mem);
 												socketRooms = socketRooms.to(mem.id);
 											});

@@ -1,13 +1,18 @@
-import mongoose, { HydratedDocument, Types } from "mongoose";
+import mongoose, { Connection, HydratedDocument, Model, Types } from "mongoose";
 import * as dotenv from "dotenv";
 import { IPostDTO } from "../dtos/post.dto";
-import postModel from "../models/post.model";
+import PostSchema from "../models/post.schema";
 
 dotenv.config();
 
 export class PostRepository {
+	private PostModel: any;
+	public constructor(connection: Connection) {
+		this.PostModel = connection.model("posts", PostSchema);
+	}
+
 	public async createPost(post: IPostDTO) {
-		const newPost: HydratedDocument<IPostDTO> = new postModel(post);
+		const newPost: HydratedDocument<IPostDTO> = new this.PostModel(post);
 		await newPost.save();
 		return newPost;
 	}
@@ -18,14 +23,14 @@ export class PostRepository {
 		images?: string[]
 	) {
 		if (images) {
-			const updatedPost = await postModel.findOneAndUpdate(
+			const updatedPost = await this.PostModel.findOneAndUpdate(
 				{ _id: postId },
 				{ content, images },
 				{ new: true }
 			);
 			return updatedPost;
 		} else {
-			const updatedPost = await postModel.findOneAndUpdate(
+			const updatedPost = await this.PostModel.findOneAndUpdate(
 				{ _id: postId },
 				{ content },
 				{ new: true }
@@ -35,34 +40,38 @@ export class PostRepository {
 	}
 
 	public async deletePost(postId: Types.ObjectId) {
-		const deletedPost = await postModel.findByIdAndDelete(postId);
+		const deletedPost = await this.PostModel.findByIdAndDelete(postId);
 		return deletedPost;
 	}
 
 	public async getFollowingsPosts(listFollowings: any) {
-		let finalPosts: any[] = [];
-		for (const user of listFollowings) {
-			const posts = await postModel.find({ user: user.id });
-			finalPosts = [...finalPosts, ...posts];
+		try {
+			let finalPosts: any[] = [];
+			for (const user of listFollowings) {
+				const posts = await this.PostModel.find({ user: user.id });
+				finalPosts = [...finalPosts, ...posts];
+			}
+			finalPosts = finalPosts.sort(
+				(objA, objB) => Number(objB.createdAt) - Number(objA.createdAt)
+			);
+			return finalPosts;
+		} catch (error) {
+			console.log(error);
 		}
-		finalPosts = finalPosts.sort(
-			(objA, objB) => Number(objB.createdAt) - Number(objA.createdAt)
-		);
-		return finalPosts;
 	}
 
 	public async getUserPosts(userId: string) {
-		const posts = await postModel.find({ user: userId });
+		const posts = await this.PostModel.find({ user: userId });
 		return posts;
 	}
 
 	public async getPostById(postId: Types.ObjectId) {
-		const post = await postModel.findById(postId);
+		const post = await this.PostModel.findById(postId);
 		return post;
 	}
 
 	public async likePost(postId: Types.ObjectId, userId: Types.ObjectId) {
-		const likedPost = await postModel.findOneAndUpdate(
+		const likedPost = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $push: { likes: userId } },
 			{ new: true }
@@ -71,12 +80,12 @@ export class PostRepository {
 	}
 
 	public async unlikePost(postId: Types.ObjectId, userId: Types.ObjectId) {
-		const unlikedPost = await postModel.findOneAndUpdate(
+		const dislikedPost = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $pull: { likes: userId } },
 			{ new: true }
 		);
-		return unlikedPost;
+		return dislikedPost;
 	}
 
 	// Helper
@@ -84,7 +93,7 @@ export class PostRepository {
 		postId: Types.ObjectId,
 		commentId: Types.ObjectId
 	) {
-		const result = await postModel.findOneAndUpdate(
+		const result = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $push: { comments: commentId } },
 			{ new: true }
@@ -96,7 +105,7 @@ export class PostRepository {
 		postId: Types.ObjectId,
 		commentId: Types.ObjectId
 	) {
-		const result = await postModel.findOneAndUpdate(
+		const result = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $pull: { comments: commentId } },
 			{ new: true }

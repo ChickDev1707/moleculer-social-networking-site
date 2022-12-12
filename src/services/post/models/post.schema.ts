@@ -1,8 +1,8 @@
-import mongoose, { Types } from "mongoose";
-const { Schema, model } = mongoose;
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 import { IPostDTO } from "../dtos/post.dto";
 
-const postSchema = new Schema<IPostDTO>({
+const PostSchema = new Schema<IPostDTO>({
   content: {
     type: "String",
     default: "default content",
@@ -19,4 +19,4 @@ const postSchema = new Schema<IPostDTO>({
   },
 });
 
-export default model("posts", postSchema);
+export default PostSchema;

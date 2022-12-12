@@ -1,21 +1,26 @@
 /* eslint-disable no-underscore-dangle */
 import { Context, Errors } from "moleculer";
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 import {
 	IConversationDTO,
 	IConversationOf2,
 	IMemberDTO,
 	IResConversation,
-	IUserInfo,
 } from "../dtos/conversation.dto";
-const { Types } = mongoose;
 import { ConversationRepository } from "../repository/conversation.repository";
 import { IApiResponse } from "../../../../configs/api.type";
 import { MessageRepository } from "../repository/message.repository";
+import { UserModel } from "../../user/types/models";
 
 export default class ConversationAction {
-	private conversationRepo = new ConversationRepository();
-	private messageRepo = new MessageRepository();
+	private conversationRepo: ConversationRepository;
+	private messageRepo: MessageRepository;
+
+	public constructor(connection: Connection) {
+		this.conversationRepo = new ConversationRepository(connection);
+		this.messageRepo = new MessageRepository(connection);
+	}
+
 	public createConversation = async (
 		ctx: Context<IConversationDTO>
 	): Promise<IApiResponse> => {
@@ -24,14 +29,14 @@ export default class ConversationAction {
 				ctx.params
 			);
 
-			const detailMembers: IUserInfo[] = await Promise.all(
+			const detailMembers: UserModel.User[] = await Promise.all(
 				newConversation.members.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -70,14 +75,14 @@ export default class ConversationAction {
 			const updatedConversation =
 				await this.conversationRepo.updateConversationName(ctx.params);
 
-			const detailMembers: IUserInfo[] = await Promise.all(
+			const detailMembers: UserModel.User[] = await Promise.all(
 				updatedConversation.members.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -111,14 +116,14 @@ export default class ConversationAction {
 					ctx.params
 				);
 
-			const detailMembers: IUserInfo[] = await Promise.all(
+			const detailMembers: UserModel.User[] = await Promise.all(
 				updatedConversation.members.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -157,14 +162,14 @@ export default class ConversationAction {
 				};
 			}
 
-			const detailMembers: IUserInfo[] = await Promise.all(
+			const detailMembers: UserModel.User[] = await Promise.all(
 				conversation.members.map(
 					async (mem: string) =>
 						(
 							await ctx.broker.call("users.getUser", {
 								userId: mem,
 							}) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -195,7 +200,7 @@ export default class ConversationAction {
 		}
 
 		// Call User service to get user info
-		let detailMembers: IUserInfo[];
+		let detailMembers: UserModel.User[];
 		const resConversation: IResConversation = {
 			_id: conversation._id,
 			members: detailMembers,
@@ -209,7 +214,7 @@ export default class ConversationAction {
 		return { code: 201, message: "", data: resConversation };
 	};
 
-	public getUserConversations = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+	public getUserConversations = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
 		try {
 			// Const userId = ctx.call("", ctx.params.requestToken);
 			const userId = ctx.params.userId;
@@ -218,14 +223,14 @@ export default class ConversationAction {
 			const resConversations: IResConversation[] = [];
 
 			for (const conversation of conversations) {
-				const detailMembers = await Promise.all(
+				const detailMembers: UserModel.User[] = await Promise.all(
 					conversation.members.map(
 						async (mem: string) =>
 							(
 								await ctx.broker.call("users.getUser", {
 									userId: mem,
 								}) as IApiResponse
-							).data as IUserInfo
+							).data
 					)
 				);
 				const resConversation: IResConversation = {
@@ -276,14 +281,14 @@ export default class ConversationAction {
 				ctx.params
 			);
 
-			const detailMembers = await Promise.all(
+			const detailMembers: UserModel.User[] = await Promise.all(
 				conversation.members.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -316,14 +321,14 @@ export default class ConversationAction {
 				await this.conversationRepo.removeMember(ctx.params);
 
 			// Call user service to get UserInfo
-			const detailMembers = await Promise.all(
+			const detailMembers: UserModel.User[] = await Promise.all(
 				updatedConversation.members.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 

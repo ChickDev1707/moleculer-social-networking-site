@@ -1,16 +1,15 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import * as dotenv from "dotenv";
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 import ConversationAction from "./actions/conversation.action";
 dotenv.config();
 
 export default class MessageService extends Service {
-	private conversationAct: ConversationAction;
+	private dbConnection: Connection = mongoose.createConnection(process.env.CHAT_DB_URI);
+	private conversationAct: ConversationAction = new ConversationAction(this.dbConnection);
 
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
-		this.conversationAct = new ConversationAction();
-
 		this.parseServiceSchema({
 			name: "conversations",
 			actions: {
@@ -74,14 +73,6 @@ export default class MessageService extends Service {
 					},
 					handler: this.conversationAct.removeMember,
 				},
-			},
-			started: async () => {
-				try {
-					await mongoose.connect(process.env.CHAT_DB_URI);
-					console.log("conversation service: connected to DB");
-				} catch (error) {
-					console.log("connect error");
-				}
 			},
 		});
 	}

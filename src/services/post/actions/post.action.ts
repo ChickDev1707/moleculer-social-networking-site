@@ -1,13 +1,15 @@
 /* eslint-disable no-underscore-dangle */
-import mongoose from "mongoose";
 import { Context, Errors } from "moleculer";
+import { Connection } from "mongoose";
 import { IPostDTO } from "../dtos/post.dto";
 import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
-import { CreateUserDto } from "../../user/dtos/create-user.dto";
 
 export default class PostAction {
-	private postRepo = new PostRepository();
+	private postRepo: PostRepository;
+	public constructor(connection: Connection){
+		this.postRepo = new PostRepository(connection);
+	}
 
 	public getHomePosts = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
 		try {
@@ -131,11 +133,11 @@ export default class PostAction {
 	public unlikePost = async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const { postId, userId } = ctx.params;
-			const unlikedPost = await this.postRepo.unlikePost(postId, userId);
+			const dislikedPost = await this.postRepo.unlikePost(postId, userId);
 			return {
-				message: "Unliked post",
+				message: "Disliked post",
 				code: 200,
-				data: unlikedPost,
+				data: dislikedPost,
 			};
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);

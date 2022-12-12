@@ -1,4 +1,4 @@
-import { HydratedDocument, Types } from "mongoose";
+import { Connection, HydratedDocument, Types } from "mongoose";
 import {
   IAnonymousMessageDTO,
 	IDeleteMessageDTO,
@@ -9,11 +9,16 @@ import {
 	ISeenMessage,
 	IUpdateMessageDTO,
 } from "../dtos/message.dto";
-import messageModel from "../models/message.model";
+import MessagesSchema from "../models/message.schema";
+import messageModel from "../models/message.schema";
 
 export class MessageRepository {
+	private MessageModel: any;
+  public constructor(connection: Connection){
+    this.MessageModel = connection.model("messages", MessagesSchema);
+  }
 	public async create(conversation: INewMessageDTO) {
-		const newMessage: HydratedDocument<IMessageDTO> = new messageModel(
+		const newMessage: HydratedDocument<IMessageDTO> = new this.MessageModel(
 			conversation
 		);
 		await newMessage.save();
@@ -21,7 +26,7 @@ export class MessageRepository {
 	}
 
   public async createAnonymousMessage(message: IAnonymousMessageDTO) {
-		const newMessage: HydratedDocument<IMessageDTO> = new messageModel(
+		const newMessage: HydratedDocument<IMessageDTO> = new this.MessageModel(
 			message
 		);
 		await newMessage.save();
@@ -29,7 +34,7 @@ export class MessageRepository {
 	}
 
 	public async getById(id: Types.ObjectId) {
-		const message = await messageModel.findById(id);
+		const message = await this.MessageModel.findById(id);
 		return message;
 	}
 
@@ -37,7 +42,7 @@ export class MessageRepository {
 		conversationId: Types.ObjectId,
 		page: number
 	) {
-		const messages = await messageModel
+		const messages = await this.MessageModel
 			.find({ conversation: conversationId})
 			.sort({ createdAt: -1 })
 			.skip((page - 1) * 5)
@@ -47,7 +52,7 @@ export class MessageRepository {
 
 	public async updateMessage(updateData: IUpdateMessageDTO) {
 		try {
-			const updatedMessage = await messageModel.findOneAndUpdate(
+			const updatedMessage = await this.MessageModel.findOneAndUpdate(
 				{ _id: updateData.id, sender: updateData.sender },
 				{ content: updateData.content },
 				{ new: true }
@@ -59,7 +64,7 @@ export class MessageRepository {
 	}
 
 	public async deleteMessage(deleteData: IDeleteMessageDTO) {
-		const conversation = await messageModel.findOneAndUpdate(
+		const conversation = await this.MessageModel.findOneAndUpdate(
 			{ sender: deleteData.sender, _id: deleteData.id },
 			{ isDeleted: true },
 			{ new: true }
@@ -68,7 +73,7 @@ export class MessageRepository {
 	}
 
 	public async seenMessage(seenData: ISeenMessage) {
-		const updatedMessage = await messageModel.findOneAndUpdate(
+		const updatedMessage = await this.MessageModel.findOneAndUpdate(
 			{ _id: seenData.id, seenBy: { $ne: seenData.seenBy } },
 			{ $push: { seenBy: seenData.seenBy } },
 			{ new: true }
@@ -77,7 +82,7 @@ export class MessageRepository {
 	}
 
 	public async reactMessage(reactData: IReactMessage) {
-		const updatedMessage = await messageModel.findByIdAndUpdate(
+		const updatedMessage = await this.MessageModel.findByIdAndUpdate(
 			reactData.id,
 			{ $push: { reactBy: reactData.reactBy } },
 			{ new: true }
@@ -87,7 +92,7 @@ export class MessageRepository {
 	}
 
 	public async unReactMessage(reactData: IReactMessage) {
-		const updatedMessage = await messageModel.findByIdAndUpdate(
+		const updatedMessage = await this.MessageModel.findByIdAndUpdate(
 			reactData.id,
 			{ $pull: { reactBy: reactData.reactBy } },
 			{ new: true }
@@ -96,7 +101,7 @@ export class MessageRepository {
 	}
 
 	public async seenAllMessage(seenData: ISeenConMessages) {
-		const updatedMessage = await messageModel.updateMany(
+		const updatedMessage = await this.MessageModel.updateMany(
 			{ conversation: seenData.id, seenBy: { $ne: seenData.seenBy } },
 			{ $push: { seenBy: seenData.seenBy } }
 		);
@@ -104,7 +109,7 @@ export class MessageRepository {
 	}
 
 	public async getLastMessage(conversationId: string) {
-		const message = await messageModel.find({ conversation: conversationId })
+		const message = await this.MessageModel.find({ conversation: conversationId })
 			.sort({ createdAt: -1 })
 			.skip(0)
 			.limit(1);

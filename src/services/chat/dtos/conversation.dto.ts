@@ -1,5 +1,5 @@
-import mongoose, { Types } from "mongoose";
-const { Schema, model } = mongoose;
+import { Types } from "mongoose";
+import { UserModel } from "../../user/types/models";
 
 export interface IConversationDTO {
 	name?: string;
@@ -23,16 +23,10 @@ export interface IMemberDTO {
 export interface IResConversation {
 	_id: Types.ObjectId;
 	name: string;
-	members: IUserInfo[];
-	detailMembers: IUserInfo[];
+	members: UserModel.User[];
+	detailMembers: UserModel.User[];
 	avatar?: string;
 	updatedAt: Date;
 	createdAt: Date;
 	createdBy: string;
-}
-
-export interface IUserInfo {
-	id: string;
-	name: string;
-	avatar?: string;
 }

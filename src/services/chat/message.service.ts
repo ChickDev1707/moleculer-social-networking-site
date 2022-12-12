@@ -1,13 +1,13 @@
 import { Service, ServiceBroker } from "moleculer";
-import mongoose from "mongoose";
+import mongoose, { Connection } from "mongoose";
 import MessageActionRest from "./actions/messageRest.action";
 
 export default class MessageService extends Service {
-	private messageAction: MessageActionRest;
+	private dbConnection: Connection = mongoose.createConnection(process.env.CHAT_DB_URI);
+	private messageAction: MessageActionRest = new MessageActionRest(this.dbConnection);
 
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
-		this.messageAction = new MessageActionRest();
 		this.parseServiceSchema({
 			name: "messages",
 			actions: {
@@ -77,14 +77,6 @@ export default class MessageService extends Service {
 					},
 					handler: this.messageAction.getConversationMessages,
 				},
-			},
-			started: async () => {
-				try {
-					await mongoose.connect(process.env.CHAT_DB_URI);
-					console.log("message service: connected to DB");
-				} catch (error) {
-					console.log("connect error");
-				}
 			},
 		});
 	}

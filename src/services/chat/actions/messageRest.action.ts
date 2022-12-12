@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { Context, Errors } from "moleculer";
-import mongoose from "mongoose";
-import { IResConversation, IUserInfo } from "../dtos/conversation.dto";
+import mongoose, { Connection } from "mongoose";
+import { IResConversation } from "../dtos/conversation.dto";
 import { MessageRepository } from "../repository/message.repository";
 import {
 	IDeleteMessageDTO,
@@ -12,11 +12,14 @@ import {
 	ISeenMessage,
 	IUpdateMessageDTO,
 } from "../dtos/message.dto";
-import { ConversationRepository } from "../repository/conversation.repository";
 import { IApiResponse } from "../../../../configs/api.type";
+import { UserModel } from "../../user/types/models";
 
 export default class MessageActionRest {
-	private messageRepo = new MessageRepository();
+	private messageRepo: MessageRepository;
+	public constructor(connection: Connection){
+		this.messageRepo = new MessageRepository(connection);
+	}
 
 	public createMessage = async (
 		ctx: Context<INewMessageDTO>
@@ -27,7 +30,7 @@ export default class MessageActionRest {
 				(await ctx.broker.call("users.getUser", {
 					userId: newMessage.sender,
 				})) as IApiResponse
-			).data as IUserInfo;
+			).data;
 
 			let conversationDetails: IResConversation;
 
@@ -69,27 +72,27 @@ export default class MessageActionRest {
 				(await ctx.broker.call("users.getUser", {
 					userId: updatedMessage.sender,
 				})) as IApiResponse
-			).data as IUserInfo;
+			).data;
 
-			const seenByDetail: IUserInfo[] = await Promise.all(
+			const seenByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.seenBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
-			const reactByDetail: IUserInfo[] = await Promise.all(
+			const reactByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.reactBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -126,7 +129,7 @@ export default class MessageActionRest {
 				ctx.params
 			);
 
-			let senderDetail: IUserInfo;
+			let senderDetail: UserModel.User;
 			let conversationDetails: IResConversation;
 
 			const resMessage: IResMessage = {
@@ -162,34 +165,34 @@ export default class MessageActionRest {
 			const updatedMessage = await this.messageRepo.seenMessage(
 				ctx.params
 			);
-			let senderDetail: IUserInfo;
+			let senderDetail: UserModel.User;
 			if (updatedMessage.sender) {
 				senderDetail = (
 					(await ctx.broker.call("users.getUser", {
 						userId: updatedMessage.sender,
 					})) as IApiResponse
-				).data as IUserInfo;
+				).data;
 			}
 
-			const seenByDetail: IUserInfo[] = await Promise.all(
+			const seenByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.seenBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
-			const reactByDetail: IUserInfo[] = await Promise.all(
+			const reactByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.reactBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -226,27 +229,27 @@ export default class MessageActionRest {
 				(await ctx.broker.call("users.getUser", {
 					userId: updatedMessage.sender,
 				})) as IApiResponse
-			).data as IUserInfo;
+			).data;
 
-			const seenByDetail: IUserInfo[] = await Promise.all(
+			const seenByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.seenBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
-			const reactByDetail: IUserInfo[] = await Promise.all(
+			const reactByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.reactBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -284,27 +287,27 @@ export default class MessageActionRest {
 				(await ctx.broker.call("users.getUser", {
 					userId: updatedMessage.sender,
 				})) as IApiResponse
-			).data as IUserInfo;
+			).data;
 
-			const seenByDetail: IUserInfo[] = await Promise.all(
+			const seenByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.seenBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
-			const reactByDetail: IUserInfo[] = await Promise.all(
+			const reactByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.reactBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -338,35 +341,35 @@ export default class MessageActionRest {
 			);
 
 			const resMessages = await Promise.all(
-				messages.map(async message => {
-					let senderDetail: IUserInfo;
+				messages.map(async (message: any) => {
+					let senderDetail: UserModel.User;
 					if (message.sender) {
 						senderDetail = (
 							(await ctx.broker.call("users.getUser", {
 								userId: message.sender,
 							})) as IApiResponse
-						).data as IUserInfo;
+						).data;
 					}
 
-					const seenByDetail: IUserInfo[] = await Promise.all(
+					const seenByDetail: UserModel.User[] = await Promise.all(
 						message.seenBy.map(
 							async (mem: string) =>
 								(
 									(await ctx.broker.call("users.getUser", {
 										userId: mem,
 									})) as IApiResponse
-								).data as IUserInfo
+								).data
 						)
 					);
 
-					const reactByDetail: IUserInfo[] = await Promise.all(
+					const reactByDetail: UserModel.User[] = await Promise.all(
 						message.reactBy.map(
 							async (mem: string) =>
 								(
 									(await ctx.broker.call("users.getUser", {
 										userId: mem,
 									})) as IApiResponse
-								).data as IUserInfo
+								).data
 						)
 					);
 
@@ -405,27 +408,27 @@ export default class MessageActionRest {
 				(await ctx.broker.call("users.getUser", {
 					userId: updatedMessage.sender,
 				})) as IApiResponse
-			).data as IUserInfo;
+			).data;
 
-			const seenByDetail: IUserInfo[] = await Promise.all(
+			const seenByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.seenBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
-			const reactByDetail: IUserInfo[] = await Promise.all(
+			const reactByDetail: UserModel.User[] = await Promise.all(
 				updatedMessage.reactBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
@@ -462,7 +465,7 @@ export default class MessageActionRest {
 				(await ctx.broker.call("users.getUser", {
 					userId: ctx.params.seenBy,
 				})) as IApiResponse
-			).data as IUserInfo;
+			).data;
 
 			return {
 				code: 201,
@@ -486,34 +489,34 @@ export default class MessageActionRest {
 					data: null,
 				};
 			}
-			let senderDetail: IUserInfo;
+			let senderDetail: UserModel.User;
 			if (messages[0].sender) {
 				senderDetail = (
 					(await ctx.broker.call("users.getUser", {
 						userId: messages[0].sender,
 					})) as IApiResponse
-				).data as IUserInfo;
+				).data;
 			}
 
-			const seenByDetail: IUserInfo[] = await Promise.all(
+			const seenByDetail: UserModel.User[] = await Promise.all(
 				messages[0].seenBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 
-			const reactByDetail: IUserInfo[] = await Promise.all(
+			const reactByDetail: UserModel.User[] = await Promise.all(
 				messages[0].reactBy.map(
 					async (mem: string) =>
 						(
 							(await ctx.broker.call("users.getUser", {
 								userId: mem,
 							})) as IApiResponse
-						).data as IUserInfo
+						).data
 				)
 			);
 

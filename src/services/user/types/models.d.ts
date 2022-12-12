@@ -9,10 +9,14 @@ export namespace UserModel{
   export interface User{
     id: string;
     name: string;
-    avatar: string;
     gender: Gender;
     dateOfBirth: Date;
+    email: string;
     address: string;
+    phoneNumber: string;
+    followers: string;
+    followings: string;
+    avatar: string;
   }
 }
 
