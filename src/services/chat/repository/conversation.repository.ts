@@ -5,7 +5,7 @@ import ConversationSchema from "../models/conversation.schema";
 dotenv.config();
 
 export class ConversationRepository {
-  private ConversationModel: any;
+  private ConversationModel: Model<IConversationDTO>;
   public constructor(connection: Connection){
     this.ConversationModel = connection.model("conversations", ConversationSchema);
   }

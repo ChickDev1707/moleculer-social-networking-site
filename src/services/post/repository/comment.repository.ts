@@ -1,4 +1,4 @@
-import { Connection, HydratedDocument, Types } from "mongoose";
+import { Connection, HydratedDocument, Model, Types } from "mongoose";
 import * as dotenv from "dotenv";
 import { ICommentDTO } from "../dtos/comment.dto";
 import CommentSchema from "../models/comment.schema";
@@ -6,7 +6,7 @@ import CommentSchema from "../models/comment.schema";
 dotenv.config();
 
 export class CommentRepository {
-	private CommentModel: any;
+	private CommentModel: Model<ICommentDTO>;
 	public constructor(connection: Connection) {
 		this.CommentModel = connection.model("comments", CommentSchema);
 	}

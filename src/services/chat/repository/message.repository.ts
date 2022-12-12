@@ -1,4 +1,4 @@
-import { Connection, HydratedDocument, Types } from "mongoose";
+import { Connection, HydratedDocument, Model, Types } from "mongoose";
 import {
   IAnonymousMessageDTO,
 	IDeleteMessageDTO,
@@ -13,7 +13,7 @@ import MessagesSchema from "../models/message.schema";
 import messageModel from "../models/message.schema";
 
 export class MessageRepository {
-	private MessageModel: any;
+	private MessageModel: Model<IMessageDTO>;
   public constructor(connection: Connection){
     this.MessageModel = connection.model("messages", MessagesSchema);
   }

@@ -6,7 +6,7 @@ import PostSchema from "../models/post.schema";
 dotenv.config();
 
 export class PostRepository {
-	private PostModel: any;
+	private PostModel: Model<IPostDTO>;
 	public constructor(connection: Connection) {
 		this.PostModel = connection.model("posts", PostSchema);
 	}
