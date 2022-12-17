@@ -55,6 +55,9 @@ services:
     ports:
       - 7474:7474
       - 7687:7687
+    volumes:
+      - ./docker/volumes/user/import:/import
+      - ./docker/volumes/user/data:/data
     env_file: docker-compose.env
     networks:
       - internal
