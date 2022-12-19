@@ -2,6 +2,7 @@ import mongoose, { Connection, HydratedDocument, Model, Types } from "mongoose";
 import * as dotenv from "dotenv";
 import { IPostDTO } from "../dtos/post.dto";
 import PostSchema from "../models/post.schema";
+import { LikePostDto } from "../dtos/like-post.dto";
 
 dotenv.config();
 
@@ -70,16 +71,18 @@ export class PostRepository {
 		return post;
 	}
 
-	public async likePost(postId: Types.ObjectId, userId: Types.ObjectId) {
+	public async likePost({ userId, postId }: LikePostDto) {
+		console.log(userId);
 		const likedPost = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $push: { likes: userId } },
 			{ new: true }
 		);
+		console.log(likedPost);
 		return likedPost;
 	}
 
-	public async unlikePost(postId: Types.ObjectId, userId: Types.ObjectId) {
+	public async dislikePost({ userId, postId }: LikePostDto) {
 		const dislikedPost = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $pull: { likes: userId } },

@@ -125,10 +125,10 @@ export default class CommentAction {
 		}
 	};
 
-	public unlikeComment = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public dislikeComment = async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const { userId, commentId } = ctx.params;
-			const dislikedComment = await this.commentRepo.unlikeComment(commentId, userId);
+			const dislikedComment = await this.commentRepo.dislikeComment(commentId, userId);
 			return {
 				message: "Disliked comment",
 				code: 200,

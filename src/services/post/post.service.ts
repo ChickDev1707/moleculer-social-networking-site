@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import mongoose, { Connection } from "mongoose";
 import PostAction from "./actions/post.action";
 import CommentAction from "./actions/comment.action";
+import { LikePostDtoSchema } from "./dtos/like-post.dto";
 dotenv.config();
 
 export default class PostService extends Service {
@@ -80,13 +81,13 @@ export default class PostService extends Service {
 					handler: this.postAct.likePost,
 				},
 
-				unlikePost: {
+				dislikePost: {
 					rest: {
 						method: "PATCH",
-						path: "/:postId/unlike",
+						path: "/:postId/dislike",
 					},
-					params: { postId: "string"},
-					handler: this.postAct.unlikePost,
+					params: LikePostDtoSchema,
+					handler: this.postAct.dislikePost,
 				},
 
 				// Comment service
@@ -145,16 +146,16 @@ export default class PostService extends Service {
 					handler: this.commentAct.likeComment,
 				},
 
-				unlikeComment: {
+				dislikeComment: {
 					rest: {
 						method: "PATCH",
-						path: "/:postId/comments/:commentId/unlike",
+						path: "/:postId/comments/:commentId/dislike",
 					},
 					params: {
 						postId: "string",
 						commentId: "string",
 					},
-					handler: this.commentAct.unlikeComment,
+					handler: this.commentAct.dislikeComment,
 				},
 			},
 			stopped: () => {

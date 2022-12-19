@@ -4,6 +4,7 @@ import { Connection } from "mongoose";
 import { IPostDTO } from "../dtos/post.dto";
 import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
+import { LikePostDto } from "../dtos/like-post.dto";
 
 export default class PostAction {
 	private postRepo: PostRepository;
@@ -116,10 +117,10 @@ export default class PostAction {
 		}
 	};
 
-	public likePost = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public likePost = async (ctx: Context<LikePostDto>): Promise<IApiResponse> => {
 		try {
-			const { postId, userId } = ctx.params;
-			const likedPost = await this.postRepo.likePost(postId, userId);
+			console.log(ctx.params);
+			const likedPost = await this.postRepo.likePost(ctx.params);
 			return {
 				message: "Liked post",
 				code: 200,
@@ -130,10 +131,9 @@ export default class PostAction {
 		}
 	};
 
-	public unlikePost = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public dislikePost = async (ctx: Context<LikePostDto>): Promise<IApiResponse> => {
 		try {
-			const { postId, userId } = ctx.params;
-			const dislikedPost = await this.postRepo.unlikePost(postId, userId);
+			const dislikedPost = await this.postRepo.dislikePost(ctx.params);
 			return {
 				message: "Disliked post",
 				code: 200,
