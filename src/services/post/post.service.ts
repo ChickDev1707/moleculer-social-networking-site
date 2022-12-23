@@ -98,7 +98,7 @@ export default class PostService extends Service {
 						path: "/:postId/comments",
 					},
 					params: { postId: "string"},
-					handler: this.commentAct.getPostcomments,
+					handler: this.commentAct.getPostComments,
 				},
 
 				createComment:{

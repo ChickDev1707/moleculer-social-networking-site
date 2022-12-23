@@ -15,7 +15,7 @@ export default class CommentAction {
 		this.commentRepo = new CommentRepository(connection);
 	}
 
-	public getPostcomments = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public getPostComments = async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const comments: ICommentDTO[] = await this.commentRepo.getPostComments(ctx.params.postId);
 			const finalComments = [];

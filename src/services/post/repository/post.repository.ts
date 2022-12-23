@@ -72,13 +72,11 @@ export class PostRepository {
 	}
 
 	public async likePost({ userId, postId }: LikePostDto) {
-		console.log(userId);
 		const likedPost = await this.PostModel.findOneAndUpdate(
 			{ _id: postId },
 			{ $push: { likes: userId } },
 			{ new: true }
 		);
-		console.log(likedPost);
 		return likedPost;
 	}
 
