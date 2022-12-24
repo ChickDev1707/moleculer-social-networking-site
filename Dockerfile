@@ -1,19 +1,14 @@
 FROM node:16-alpine
 
-# Working directory
+ENV NODE_ENV=production
+
+RUN mkdir /app
 WORKDIR /app
 
-# Install dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --silent
 
-# Copy source
+RUN npm install --production
+
 COPY . .
 
-# Build and cleanup
-ENV NODE_ENV=production
-RUN npm run build \
- && npm prune
-
-# Start server
 CMD ["npm", "start"]

@@ -3,8 +3,10 @@
  * Moleculer ServiceBroker configuration file
  *
  */
+import { BrokerOptions, Errors } from "moleculer";
 import { JoiValidator } from "./configs/validator";
-module.exports = {
+
+const brokerConfig: BrokerOptions  = {
 	// Namespace of nodes to segment your nodes on the same network.
 	namespace: "",
 	// Unique node identifier. Must be unique in a namespace.
@@ -64,7 +66,7 @@ module.exports = {
 		// Backoff factor for delay. 2 means exponential backoff.
 		factor: 2,
 		// A function to check failed requests.
-		check: (err: { retryable: any }) => err && !!err.retryable,
+		check: (err: Error) => err && err instanceof Errors.MoleculerRetryableError && !!err.retryable,
 	},
 
 	// Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -111,7 +113,8 @@ module.exports = {
 		// Number of milliseconds to switch from open to half-open state
 		halfOpenTime: 10 * 1000,
 		// A function to check failed requests.
-		check: (err: { code: number }) => err && err.code >= 500,
+		check: (err: Error) => err && err instanceof Errors.MoleculerError && err.code >= 500,
+
 	},
 
 	// Settings of bulkhead feature. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Bulkhead
@@ -123,7 +126,6 @@ module.exports = {
 		// Maximum size of queue
 		maxQueueSize: 100,
 	},
-	validation: true,
 
 	// Enable action & event parameter validation. More info: https://moleculer.services/docs/0.14/validating.html
 	validator: new JoiValidator(),
@@ -178,3 +180,5 @@ module.exports = {
 	// Register custom REPL commands.
 	replCommands: null,
 };
+
+export = brokerConfig;
