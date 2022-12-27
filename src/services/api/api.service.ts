@@ -65,8 +65,6 @@ export default class ApiService extends Service {
 						onBeforeCall: (ctx: Context<any, { accessToken: string }>,
 							route: object, req: any, res: ServerResponse) => {
 							// Attach accessToken to ctx
-							console.log(req.file);
-							console.log(req.files);
 							const auth = req.headers.authorization;
 							if (auth && auth.startsWith("Bearer")) {
 								ctx.meta.accessToken = auth.slice(7);
