@@ -3,6 +3,9 @@ import { IMessageDTO } from "../dtos/message.dto";
 const { Schema } = mongoose;
 
 const MessagesSchema = new Schema<IMessageDTO>({
+	type: {
+		type: "number",
+	},
 	conversation: {
 		type: Schema.Types.ObjectId,
 		ref: "conversations",
