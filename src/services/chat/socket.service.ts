@@ -49,14 +49,12 @@ export default class MessageService extends Service {
 										if (result.code === 201) {
 											let socketRooms = socket.server;
 											result.data.members.forEach((mem: UserModel.User) => {
-												console.log("conversation member", mem);
 												socketRooms = socketRooms.to(mem.id);
 											});
 											socketRooms.emit("newConversation", result.data);
 										}
 									} catch (error) {
 										socket.emit("error", "error");
-										console.log(error);
 										throw new Errors.MoleculerError(
 											"Internal server error",
 											500
@@ -75,16 +73,7 @@ export default class MessageService extends Service {
 												data
 											);
 										if (result.code === 201) {
-											// socket.emit(
-											// 	"updateConversation",
-											// 	result.data
-											// );
-											// socket.broadcast.emit(
-											// 	"updateConversation",
-											// 	result.data
-											// );
 											socket.server.to(result.data._id.toString()).emit("updateConversation", result.data);
-
 										}
 									} catch {
 										socket.emit("error", "error");

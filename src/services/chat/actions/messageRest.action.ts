@@ -36,6 +36,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: newMessage._id,
+				type: newMessage.type,
 				conversation: newMessage.conversation,
 				conversationDetails,
 				sender: newMessage.sender,
@@ -98,6 +99,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
+				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
 				senderDetail,
@@ -134,6 +136,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
+				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				conversationDetails,
 				sender: updatedMessage.sender,
@@ -198,6 +201,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
+				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
 				senderDetail,
@@ -257,6 +261,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
+				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				conversationDetails,
 				sender: updatedMessage.sender,
@@ -313,6 +318,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
+				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
 				senderDetail,
@@ -375,6 +381,7 @@ export default class MessageActionRest {
 
 					const resMessage: IResMessage = {
 						_id: message._id,
+						type: message.type,
 						conversation: message.conversation,
 						sender: message.sender,
 						senderDetail,
@@ -434,6 +441,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
+				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
 				senderDetail,
@@ -522,6 +530,7 @@ export default class MessageActionRest {
 
 			const resMessage: IResMessage = {
 				_id: messages[0]._id,
+				type: messages[0].type,
 				conversation: messages[0].conversation,
 				sender: messages[0].sender,
 				senderDetail,

@@ -1,8 +1,10 @@
 import { Types } from "mongoose";
 import { UserModel } from "../../user/types/models";
+import { TypeMessage } from "../enums/type-message.enum";
 import { IResConversation } from "./conversation.dto";
 
 export interface IMessageDTO {
+	type: TypeMessage;
 	conversation: Types.ObjectId;
 	sender: string;
 	content: string;
@@ -47,6 +49,7 @@ export interface IDeleteMessageDTO {
 
 export interface IResMessage {
 	_id: Types.ObjectId;
+	type: TypeMessage;
 	conversation: Types.ObjectId;
 	conversationDetails?: IResConversation;
 	sender: string;
