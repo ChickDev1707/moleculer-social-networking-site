@@ -1,4 +1,5 @@
 import { Client } from "minio";
+import { Context } from "moleculer";
 import { IApiResponse } from "../../../../configs/api.type";
 import { handleError } from "../../../utils/erros.util";
 
@@ -22,6 +23,20 @@ export default class MediaAction {
         message: "Saved image",
         code: 200,
         data: imageUrl,
+      };
+    } catch (err) {
+      handleError(err);
+    }
+  };
+  public removeFiles = async (ctx: Context<{images: string[]}>): Promise<IApiResponse> => {
+    try {
+      const regex = /image-\d+/;
+      const fileNames = ctx.params.images.map((image: string)=> regex.exec(image)[0]);
+      await this.minioClient.removeObjects("images", fileNames);
+      return {
+        message: "Removed image",
+        code: 200,
+        data: null,
       };
     } catch (err) {
       handleError(err);

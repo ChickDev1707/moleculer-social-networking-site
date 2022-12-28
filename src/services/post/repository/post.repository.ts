@@ -21,23 +21,14 @@ export class PostRepository {
 	public async updatePost(
 		postId: Types.ObjectId,
 		content: string,
-		images?: string[]
+		images: string[]
 	) {
-		if (images) {
-			const updatedPost = await this.PostModel.findOneAndUpdate(
-				{ _id: postId },
-				{ content, images },
-				{ new: true }
-			);
-			return updatedPost;
-		} else {
-			const updatedPost = await this.PostModel.findOneAndUpdate(
-				{ _id: postId },
-				{ content },
-				{ new: true }
-			);
-			return updatedPost;
-		}
+		const updatedPost = await this.PostModel.findOneAndUpdate(
+			{ _id: postId },
+			{ content, images },
+			{ new: true }
+		);
+		return updatedPost;
 	}
 
 	public async deletePost(postId: Types.ObjectId) {

@@ -6,6 +6,7 @@ import mongoose, { Connection } from "mongoose";
 import PostAction from "./actions/post.action";
 import CommentAction from "./actions/comment.action";
 import { LikePostDtoSchema } from "./dtos/like-post.dto";
+import { UpdatePostDtoSchema } from "./dtos/update-post.dto";
 dotenv.config();
 
 export default class PostService extends Service {
@@ -59,7 +60,7 @@ export default class PostService extends Service {
 						method: "PATCH",
 						path: "/:postId",
 					},
-					params: { postId: "string"},
+					params: UpdatePostDtoSchema,
 					handler: this.postAct.updatePost,
 				},
 

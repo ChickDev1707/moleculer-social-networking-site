@@ -17,6 +17,10 @@ export default class MediaService extends Service {
 				save: {
 					handler: this.action.saveFile,
 				},
+				removeFiles: {
+					params: { images: "array" },
+					handler: this.action.removeFiles,
+				},
 			},
 
 		});
