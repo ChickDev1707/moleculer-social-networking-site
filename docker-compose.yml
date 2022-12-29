@@ -29,22 +29,23 @@ services:
 
     depends_on:
       - nats
+      - user-db
     networks:
       - internal
 
-  # post:
-  #   build:
-  #     context: .
-  #   image: moleculer-demo
-  #   env_file: docker-compose.env
-  #   environment:
-  #     SERVICES: post
+  post:
+    build:
+      context: .
+    image: moleculer-demo
+    env_file: docker-compose.env
+    environment:
+      SERVICES: post
 
-  #   depends_on:
-  #     - nats
-  #     - redis
-  #   networks:
-  #     - internal
+    depends_on:
+      - nats
+      - post-db
+    networks:
+      - internal
 
   # db
   user-db:
@@ -76,6 +77,21 @@ services:
     networks:
       - internal
 
+  # minio media storage
+  media:
+    image: quay.io/minio/minio
+    container_name: media
+    ports:
+      - 9000:9000
+      - 9090:9090
+    env_file: docker-compose.env
+    command: server /data --console-address ":9090"
+    volumes:
+      - ./docker/volumes/media/data:/data
+    networks:
+      - internal
+
+  # transporter
   nats:
     image: nats:2
     ports:

@@ -67,4 +67,4 @@ typings/
 dist/
 
 # user data volume
-/docker/volumes/user/data
+/docker/volumes

@@ -1,19 +1,19 @@
 import mongoose, { Connection, HydratedDocument, Model, Types } from "mongoose";
 import * as dotenv from "dotenv";
-import { IPostDTO } from "../dtos/post.dto";
+import { IPost } from "../entities/post.entity";
 import PostSchema from "../models/post.schema";
 import { LikePostDto } from "../dtos/like-post.dto";
 
 dotenv.config();
 
 export class PostRepository {
-	private PostModel: Model<IPostDTO>;
+	private PostModel: Model<IPost>;
 	public constructor(connection: Connection) {
 		this.PostModel = connection.model("posts", PostSchema);
 	}
 
-	public async createPost(post: IPostDTO) {
-		const newPost: HydratedDocument<IPostDTO> = new this.PostModel(post);
+	public async createPost(post: IPost) {
+		const newPost: HydratedDocument<IPost> = new this.PostModel(post);
 		await newPost.save();
 		return newPost;
 	}
@@ -21,23 +21,14 @@ export class PostRepository {
 	public async updatePost(
 		postId: Types.ObjectId,
 		content: string,
-		images?: string[]
+		images: string[]
 	) {
-		if (images) {
-			const updatedPost = await this.PostModel.findOneAndUpdate(
-				{ _id: postId },
-				{ content, images },
-				{ new: true }
-			);
-			return updatedPost;
-		} else {
-			const updatedPost = await this.PostModel.findOneAndUpdate(
-				{ _id: postId },
-				{ content },
-				{ new: true }
-			);
-			return updatedPost;
-		}
+		const updatedPost = await this.PostModel.findOneAndUpdate(
+			{ _id: postId },
+			{ content, images },
+			{ new: true }
+		);
+		return updatedPost;
 	}
 
 	public async deletePost(postId: Types.ObjectId) {

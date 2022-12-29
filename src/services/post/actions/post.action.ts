@@ -1,14 +1,15 @@
 /* eslint-disable no-underscore-dangle */
 import { Context, Errors } from "moleculer";
-import { Connection } from "mongoose";
-import { IPostDTO } from "../dtos/post.dto";
+import { Connection, Types } from "mongoose";
+import { IPost } from "../entities/post.entity";
 import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
 import { LikePostDto } from "../dtos/like-post.dto";
+import { UpdatePostDto } from "../dtos/update-post.dto";
 
 export default class PostAction {
 	private postRepo: PostRepository;
-	public constructor(connection: Connection){
+	public constructor(connection: Connection) {
 		this.postRepo = new PostRepository(connection);
 	}
 
@@ -32,9 +33,9 @@ export default class PostAction {
 		}
 	};
 
-	public getUserPosts = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+	public getUserPosts = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
 		try {
-			const posts: IPostDTO[] = await this.postRepo.getUserPosts(ctx.params.userId);
+			const posts: IPost[] = await this.postRepo.getUserPosts(ctx.params.userId);
 			const finalPosts = [];
 			for (const post of posts) {
 				const finalPost = await getFullDetailPost(ctx, post);
@@ -53,7 +54,7 @@ export default class PostAction {
 	public getPostById = async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const { postId } = ctx.params;
-			const post: IPostDTO = await this.postRepo.getPostById(postId);
+			const post: IPost = await this.postRepo.getPostById(postId);
 			const finalPost = await getFullDetailPost(ctx, post);
 			return {
 				message: "Successful request",
@@ -65,7 +66,7 @@ export default class PostAction {
 		}
 	};
 
-	public createPost = async (ctx: Context<IPostDTO>): Promise<IApiResponse> => {
+	public createPost = async (ctx: Context<IPost>): Promise<IApiResponse> => {
 		try {
 			const newPost = await this.postRepo.createPost(ctx.params);
 			return {
@@ -78,20 +79,16 @@ export default class PostAction {
 		}
 	};
 
-	public updatePost = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public updatePost = async (ctx: Context<UpdatePostDto>): Promise<IApiResponse> => {
 		try {
-			const { postId, content, images } = ctx.params;
-			let updatedPost = {} as IPostDTO;
-			if (images) {
-				const imagesArray = images.split(",");
-				updatedPost = await this.postRepo.updatePost(
-					postId,
-					content,
-					imagesArray
-				);
-			} else {
-				updatedPost = await this.postRepo.updatePost(postId, content);
-			}
+			const { postId, content, oldImages, images } = ctx.params;
+
+			const deletedImages = oldImages.filter((image: string) => !images.includes(image));
+
+			await ctx.broker.call("media.removeFiles", { images: deletedImages });
+
+			const updatedPost = await this.postRepo.updatePost(postId, content, images);
+
 			return {
 				message: "Updated post",
 				code: 200,
@@ -102,11 +99,12 @@ export default class PostAction {
 		}
 	};
 
-	public deletePost = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public deletePost = async (ctx: Context<{postId: Types.ObjectId}>): Promise<IApiResponse> => {
 		try {
 			const deletedPost = await this.postRepo.deletePost(
 				ctx.params.postId
 			);
+			await ctx.broker.call("media.removeFiles", { images: deletedPost.images });
 			return {
 				message: "Deleted post",
 				code: 200,
@@ -119,7 +117,6 @@ export default class PostAction {
 
 	public likePost = async (ctx: Context<LikePostDto>): Promise<IApiResponse> => {
 		try {
-			console.log(ctx.params);
 			const likedPost = await this.postRepo.likePost(ctx.params);
 			return {
 				message: "Liked post",
@@ -149,7 +146,7 @@ export default class PostAction {
 export const getFullDetailPost = async (ctx: any, post: any) => {
 	try {
 		// Get user info
-		const userInfoResponse: IApiResponse = await ctx.broker.call("users.getUser", {userId: post.user});
+		const userInfoResponse: IApiResponse = await ctx.broker.call("users.getUser", { userId: post.user });
 		// Get list user liked this post
 		const listUserLiked: any[] = [];
 		for (const userId of post.likes) {
@@ -159,8 +156,9 @@ export const getFullDetailPost = async (ctx: any, post: any) => {
 		// Return final post
 		const finalPost = {
 			...post._doc,
-			...{user: userInfoResponse.data},
-			...{likes: listUserLiked}};
+			...{ user: userInfoResponse.data },
+			...{ likes: listUserLiked },
+		};
 		return finalPost;
 	} catch (error) {
 		throw new Errors.MoleculerError("Internal server error", 500);
