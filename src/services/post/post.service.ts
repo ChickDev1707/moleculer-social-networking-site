@@ -2,7 +2,7 @@
 
 import { Service, ServiceBroker } from "moleculer";
 import * as dotenv from "dotenv";
-import mongoose, { Connection } from "mongoose";
+import mongoose, { Connection, Types } from "mongoose";
 import PostAction from "./actions/post.action";
 import CommentAction from "./actions/comment.action";
 import { LikePostDtoSchema } from "./dtos/like-post.dto";
@@ -43,7 +43,7 @@ export default class PostService extends Service {
 						method: "GET",
 						path: "/:postId",
 					},
-					params: { postId: "string"},
+					params: { postId: "string" },
 					handler: this.postAct.getPostById,
 				},
 
@@ -69,7 +69,7 @@ export default class PostService extends Service {
 						method: "DELETE",
 						path: "/:postId",
 					},
-					params: { postId: "string"},
+					params: { postId: Types.ObjectId },
 					handler: this.postAct.deletePost,
 				},
 
@@ -78,7 +78,7 @@ export default class PostService extends Service {
 						method: "PATCH",
 						path: "/:postId/like",
 					},
-					params: { postId: "string"},
+					params: { postId: "string" },
 					handler: this.postAct.likePost,
 				},
 
@@ -95,19 +95,19 @@ export default class PostService extends Service {
 				// Get all comments of a post
 				getPostComments: {
 					rest: {
-						method:"GET",
+						method: "GET",
 						path: "/:postId/comments",
 					},
-					params: { postId: "string"},
+					params: { postId: "string" },
 					handler: this.commentAct.getPostComments,
 				},
 
-				createComment:{
+				createComment: {
 					rest: {
 						method: "POST",
 						path: "/:postId/comments",
 					},
-					params: { postId: "string"},
+					params: { postId: "string" },
 					handler: this.commentAct.createComment,
 				},
 

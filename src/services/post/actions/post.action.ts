@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { Context, Errors } from "moleculer";
 import { Connection, Types } from "mongoose";
-import { IPostDTO } from "../dtos/post.dto";
+import { IPost } from "../entities/post.entity";
 import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
 import { LikePostDto } from "../dtos/like-post.dto";
@@ -35,7 +35,7 @@ export default class PostAction {
 
 	public getUserPosts = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
 		try {
-			const posts: IPostDTO[] = await this.postRepo.getUserPosts(ctx.params.userId);
+			const posts: IPost[] = await this.postRepo.getUserPosts(ctx.params.userId);
 			const finalPosts = [];
 			for (const post of posts) {
 				const finalPost = await getFullDetailPost(ctx, post);
@@ -54,7 +54,7 @@ export default class PostAction {
 	public getPostById = async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const { postId } = ctx.params;
-			const post: IPostDTO = await this.postRepo.getPostById(postId);
+			const post: IPost = await this.postRepo.getPostById(postId);
 			const finalPost = await getFullDetailPost(ctx, post);
 			return {
 				message: "Successful request",
@@ -66,7 +66,7 @@ export default class PostAction {
 		}
 	};
 
-	public createPost = async (ctx: Context<IPostDTO>): Promise<IApiResponse> => {
+	public createPost = async (ctx: Context<IPost>): Promise<IApiResponse> => {
 		try {
 			const newPost = await this.postRepo.createPost(ctx.params);
 			return {
@@ -99,11 +99,12 @@ export default class PostAction {
 		}
 	};
 
-	public deletePost = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public deletePost = async (ctx: Context<{postId: Types.ObjectId}>): Promise<IApiResponse> => {
 		try {
 			const deletedPost = await this.postRepo.deletePost(
 				ctx.params.postId
 			);
+			await ctx.broker.call("media.removeFiles", { images: deletedPost.images });
 			return {
 				message: "Deleted post",
 				code: 200,

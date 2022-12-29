@@ -1,7 +1,7 @@
 import mongoose, { Types } from "mongoose";
 const { Schema, model } = mongoose;
 
-export interface IPostDTO {
+export interface IPost {
 	content: string;
 	images: string[];
 	likes: string[];

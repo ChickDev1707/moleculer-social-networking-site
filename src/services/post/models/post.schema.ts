@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-import { IPostDTO } from "../dtos/post.dto";
+import { IPost } from "../entities/post.entity";
 
-const PostSchema = new Schema<IPostDTO>({
+const PostSchema = new Schema<IPost>({
   content: {
     type: "String",
     default: "default content",
