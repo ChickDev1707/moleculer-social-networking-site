@@ -14,10 +14,11 @@ import {
 } from "../dtos/message.dto";
 import { IApiResponse } from "../../../../configs/api.type";
 import { UserModel } from "../../user/types/models";
+import { TypeMessage } from "../enums/type-message.enum";
 
 export default class MessageActionRest {
 	private messageRepo: MessageRepository;
-	public constructor(connection: Connection){
+	public constructor(connection: Connection) {
 		this.messageRepo = new MessageRepository(connection);
 	}
 
@@ -62,7 +63,7 @@ export default class MessageActionRest {
 		}
 	};
 
-	public DeleteMessage = async (
+	public deleteMessage = async (
 		ctx: Context<IDeleteMessageDTO>
 	): Promise<IApiResponse> => {
 		try {
@@ -96,7 +97,11 @@ export default class MessageActionRest {
 						).data
 				)
 			);
-
+			// Delete image from storage if message is image type
+			if (updatedMessage.type === TypeMessage.IMAGE) {
+				const images = JSON.parse(updatedMessage.content);
+				await ctx.broker.call("media.removeFiles", { images });
+			}
 			const resMessage: IResMessage = {
 				_id: updatedMessage._id,
 				type: updatedMessage.type,
@@ -338,7 +343,7 @@ export default class MessageActionRest {
 	};
 
 	public getConversationMessages = async (
-		ctx: Context<{conversationId: mongoose.Types.ObjectId; page: number}>
+		ctx: Context<{ conversationId: mongoose.Types.ObjectId; page: number }>
 	): Promise<IApiResponse> => {
 		try {
 			const messages = await this.messageRepo.getMessageOfConversation(
@@ -404,66 +409,6 @@ export default class MessageActionRest {
 		}
 	};
 
-	public deleteMessage = async (
-		ctx: Context<IDeleteMessageDTO>
-	): Promise<IApiResponse> => {
-		try {
-			const updatedMessage = await this.messageRepo.deleteMessage(
-				ctx.params
-			);
-			const senderDetail = (
-				(await ctx.broker.call("users.getUser", {
-					userId: updatedMessage.sender,
-				})) as IApiResponse
-			).data;
-
-			const seenByDetail: UserModel.User[] = await Promise.all(
-				updatedMessage.seenBy.map(
-					async (mem: string) =>
-						(
-							(await ctx.broker.call("users.getUser", {
-								userId: mem,
-							})) as IApiResponse
-						).data
-				)
-			);
-
-			const reactByDetail: UserModel.User[] = await Promise.all(
-				updatedMessage.reactBy.map(
-					async (mem: string) =>
-						(
-							(await ctx.broker.call("users.getUser", {
-								userId: mem,
-							})) as IApiResponse
-						).data
-				)
-			);
-
-			const resMessage: IResMessage = {
-				_id: updatedMessage._id,
-				type: updatedMessage.type,
-				conversation: updatedMessage.conversation,
-				sender: updatedMessage.sender,
-				senderDetail,
-				content: updatedMessage.content,
-				seenBy: updatedMessage.seenBy,
-				reactBy: updatedMessage.reactBy,
-				seenByDetail,
-				reactByDetail,
-				updatedAt: updatedMessage.updatedAt,
-				createdAt: updatedMessage.createdAt,
-				isDeleted: updatedMessage.isDeleted,
-			};
-			return {
-				code: 201,
-				message: "Message was deleted",
-				data: resMessage,
-			};
-		} catch (error) {
-			throw new Errors.MoleculerError("Internal server error", 500);
-		}
-	};
-
 	public seenAllMessage = async (
 		ctx: Context<ISeenConMessages>
 	): Promise<IApiResponse> => {
@@ -486,7 +431,7 @@ export default class MessageActionRest {
 	};
 
 	public getLastMessage = async (
-		ctx: Context<{conversationId: string}>
+		ctx: Context<{ conversationId: string }>
 	): Promise<IApiResponse> => {
 		try {
 			const messages = await this.messageRepo.getLastMessage(ctx.params.conversationId);

@@ -52,9 +52,9 @@ export default class MessageService extends Service {
 				deleteRest: {
 					rest: {
 						method: "PATCH",
-						path: "/:id/delete",
+						path: "/:id",
 					},
-					handler: this.messageAction.DeleteMessage,
+					handler: this.messageAction.deleteMessage,
 				},
 				updateRest: {
 					rest: {
@@ -66,7 +66,7 @@ export default class MessageService extends Service {
 				getConversationLastMessage: {
 					rest: {
 						method: "GET",
-						path: "/LastMessage",
+						path: "/lastMessage",
 					},
 					handler: this.messageAction.getLastMessage,
 				},
