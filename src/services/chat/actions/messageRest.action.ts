@@ -70,33 +70,6 @@ export default class MessageActionRest {
 			const updatedMessage = await this.messageRepo.deleteMessage(
 				ctx.params
 			);
-			const senderDetail = (
-				(await ctx.broker.call("users.getUser", {
-					userId: updatedMessage.sender,
-				})) as IApiResponse
-			).data;
-
-			const seenByDetail: UserModel.User[] = await Promise.all(
-				updatedMessage.seenBy.map(
-					async (mem: string) =>
-						(
-							(await ctx.broker.call("users.getUser", {
-								userId: mem,
-							})) as IApiResponse
-						).data
-				)
-			);
-
-			const reactByDetail: UserModel.User[] = await Promise.all(
-				updatedMessage.reactBy.map(
-					async (mem: string) =>
-						(
-							(await ctx.broker.call("users.getUser", {
-								userId: mem,
-							})) as IApiResponse
-						).data
-				)
-			);
 			// Delete image from storage if message is image type
 			if (updatedMessage.type === TypeMessage.IMAGE) {
 				const images = JSON.parse(updatedMessage.content);
@@ -107,12 +80,9 @@ export default class MessageActionRest {
 				type: updatedMessage.type,
 				conversation: updatedMessage.conversation,
 				sender: updatedMessage.sender,
-				senderDetail,
 				content: updatedMessage.content,
 				seenBy: updatedMessage.seenBy,
 				reactBy: updatedMessage.reactBy,
-				seenByDetail,
-				reactByDetail,
 				updatedAt: updatedMessage.updatedAt,
 				createdAt: updatedMessage.createdAt,
 				isDeleted: updatedMessage.isDeleted,

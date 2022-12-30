@@ -56,9 +56,9 @@ export interface IResMessage {
 	senderDetail?: UserModel.User;
 	content: string;
 	seenBy: [string];
-	seenByDetail: UserModel.User[];
+	seenByDetail?: UserModel.User[];
 	reactBy: [string];
-	reactByDetail: UserModel.User[];
+	reactByDetail?: UserModel.User[];
 	updatedAt: Date;
 	createdAt: Date;
 	isDeleted: boolean;
