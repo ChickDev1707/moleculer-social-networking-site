@@ -2,6 +2,7 @@
 import { Errors, Service, ServiceBroker } from "moleculer";
 import SocketIOService from "moleculer-io";
 import { IApiResponse } from "../../../configs/api.type";
+import { IResNotification } from "../notification/dtos/notification.dto";
 import { UserModel } from "../user/types/models";
 import { IConversationDTO, IMemberDTO } from "./dtos/conversation.dto";
 import { INewMessageDTO, ISeenConMessages } from "./dtos/message.dto";
@@ -12,6 +13,15 @@ export default class MessageService extends Service {
 		this.parseServiceSchema({
 			name: "io",
 			mixins: [SocketIOService],
+			events: {
+        // Subscribe to "notification.create" event
+        "notification.created"(notification: IResNotification) {
+					const socketRoom = this.io;
+					if(notification){
+						socketRoom.to(notification.to.id).emit("newNotification", notification);
+					}
+        },
+			},
 			settings: {
 				port: 3003,
 				logClientConnection: "warn",
