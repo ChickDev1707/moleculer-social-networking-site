@@ -94,6 +94,17 @@ export class UserAction {
       handleError(error);
     }
   };
+  public validateAccount = async (ctx: Context<{accountId: string}>): Promise<IApiResponse> => {
+    try{
+      await this.userRepo.activateAccount(ctx.params.accountId);
+      return {
+        code: 200,
+        message: "Your account has been activated",
+      };
+    }catch(error){
+      handleError(error);
+    }
+  };
   // Follow actions
   public editFollowing = async (ctx: Context<FollowingDto>): Promise<IApiResponse> => {
     try {
