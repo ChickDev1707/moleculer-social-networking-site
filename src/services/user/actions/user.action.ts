@@ -1,8 +1,9 @@
 import { Context, Errors } from "moleculer";
 import * as bcrypt from "bcrypt";
-import Record from "neode/node_modules/neo4j-driver-core/types/record";
+import Record from "neo4j-driver-core/types/record";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+import * as EmailValidator from "email-validator";
 import { IApiResponse } from "../../../../configs/api.type";
 import { LoginDto } from "../dtos/login.dto";
 import { UserRepository } from "../repository/user.repository";
@@ -12,12 +13,13 @@ import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
+
 dotenv.config();
 
 export class UserAction {
   private userRepo = new UserRepository();
   // User profile
-  public getUserInfo = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getUserInfo = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const user: UserModel.User = await this.userRepo.findUserById(ctx.params.userId);
       return {
@@ -38,6 +40,11 @@ export class UserAction {
       const [account]: [UserModel.Account, UserModel.User] = await this.userRepo.findAccountByUsername(registerDto.username);
       if (account) {
         throw new Errors.MoleculerClientError("Username already exists", 400);
+      }
+
+      if (EmailValidator.validate(ctx.params.username)) {
+        // Is email
+        const isEmailValid = await ctx.broker.call("mailer.validateMail", { email: ctx.params.username });
       }
 
       // Hash password to store in db
@@ -84,9 +91,9 @@ export class UserAction {
   public editFollowing = async (ctx: Context<FollowingDto>): Promise<IApiResponse> => {
     try {
       const hasFollowed: boolean = await this.userRepo.checkHasFollowed(ctx.params);
-      if(ctx.params.actionType === FollowingAction.FOLLOW){
+      if (ctx.params.actionType === FollowingAction.FOLLOW) {
         return this.follow(ctx.params, hasFollowed);
-      }else{
+      } else {
         return this.unFollow(ctx.params, hasFollowed);
       }
     } catch (error) {
@@ -94,7 +101,7 @@ export class UserAction {
     }
   };
   public follow = async (followingDto: FollowingDto, hasFollowed: boolean): Promise<IApiResponse> => {
-    if(hasFollowed){
+    if (hasFollowed) {
       throw new Errors.MoleculerClientError("You have already followed this user", 400);
     }
     await this.userRepo.addFollowing(followingDto);
@@ -106,7 +113,7 @@ export class UserAction {
   };
 
   public unFollow = async (followingDto: FollowingDto, hasFollowed: boolean): Promise<IApiResponse> => {
-    if(!hasFollowed){
+    if (!hasFollowed) {
       throw new Errors.MoleculerClientError("You didn't follow this user", 400);
     }
     await this.userRepo.deleteFollowing(followingDto);
@@ -118,7 +125,7 @@ export class UserAction {
   };
 
   // Read followings/followers
-  public getFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getFollowings = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const followings: UserModel.User[] = await this.userRepo.getFollowings(ctx.params.userId);
       return {
@@ -131,7 +138,7 @@ export class UserAction {
     }
   };
 
-  public getFollowers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getFollowers = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const followers: UserModel.User[] = await this.userRepo.getFollowers(ctx.params.userId);
       return {
@@ -144,7 +151,7 @@ export class UserAction {
     }
   };
 
-  public getAvailableUsers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getAvailableUsers = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const users: UserModel.User[] = await this.userRepo.getAvailableUsers(ctx.params.userId);
       return {
@@ -157,7 +164,7 @@ export class UserAction {
     }
   };
 
-  public getRecommendedFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getRecommendedFollowings = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const users: MutualFollowingsPayload[] = await this.userRepo.getRecommendedFollowings(ctx.params.userId);
       return {

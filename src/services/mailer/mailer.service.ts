@@ -11,17 +11,27 @@ export default class MailerService extends Service {
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
 		this.parseServiceSchema({
-			name: "mail",
+			name: "mailer",
 			actions: {
 				// Mailer service
-        sendMail: {
-          rest: {
-            method: "POST",
-            path: "/single",
-          },
+				sendMail: {
+					rest: {
+						method: "POST",
+						path: "/single",
+					},
 					params: SendMailDtoSchema,
-          handler: this.action.sendSingleMail,
-        },
+					handler: () => "",
+				},
+				validateMail: {
+					rest: {
+						method: "GET",
+						path: "/validate",
+					},
+					params: {
+						email: "string",
+					},
+					handler: () => "",
+				},
 			},
 		});
 	}

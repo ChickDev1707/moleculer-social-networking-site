@@ -1,6 +1,6 @@
 import { dirname } from "path";
 import * as dotenv from "dotenv";
-import Record from "neode/node_modules/neo4j-driver-core/types/record";
+import Record from "neo4j-driver-core/types/record";
 import { pick } from "lodash";
 import Neode, { Node } from "neode";
 import { v1 as uuidv1 } from "uuid";
