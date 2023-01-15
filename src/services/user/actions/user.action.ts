@@ -13,6 +13,7 @@ import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
 import { SendMailDto } from "../../mailer/dtos/send-mail.dto";
+import { AccountStatus } from "../enums/account-status.enum";
 
 dotenv.config();
 
@@ -82,6 +83,10 @@ export class UserAction {
       const isValidated = await bcrypt.compare(password, account.password);
       if (!isValidated) {
         throw new Errors.MoleculerClientError("Wrong password!", 401);
+      }
+
+      if (account.status !== AccountStatus.ACTIVE) {
+        throw new Errors.MoleculerClientError("Your account is not active yet", 401);
       }
       const [accessToken] = this.generateTokens(user.id);
 
