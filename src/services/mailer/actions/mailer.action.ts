@@ -1,5 +1,6 @@
 
 import * as fs from "fs";
+import * as path from "path";
 import nodemailer from "nodemailer";
 import * as dotenv from "dotenv";
 import { Context } from "moleculer";
@@ -19,20 +20,26 @@ export default class MailerAction {
   });
   public sendSingleMail = async (ctx: Context<SendMailDto>) => {
 
-    const mailOptions: any = {
-      to: ctx.params.receiver,
-      from: process.env.MAILER_USER,
-      subject: ctx.params.subject,
-    };
-    if (ctx.params.content) {
-      mailOptions.text = ctx.params.content;
+    try {
+      const mailOptions: any = {
+        to: ctx.params.receiver,
+        from: process.env.MAILER_USER,
+        subject: ctx.params.subject,
+      };
+      if (ctx.params.content) {
+        mailOptions.text = ctx.params.content;
+      }
+      if (ctx.params.template) {
+        const rootPath = path.resolve("./");
+        let data = fs.readFileSync(`${rootPath}/public/mail-template/${ctx.params.template}.html`, "utf8");
+        data = data.replace("{{verify-link}}", `http://localhost:3000/api/users/validate?accountId=${ctx.params.payload?.accountId}`);
+        mailOptions.html = data;
+      }
+      const result = await this.transporter.sendMail(mailOptions);
+      return result;
+    } catch (error) {
+      handleError(error);
     }
-    if (ctx.params.template) {
-      const data = fs.readFileSync(`../../../../public/mail-template/${ctx.params.template}.html`, "utf8");
-      mailOptions.html = data;
-    }
-    const result = await this.transporter.sendMail(mailOptions);
-    return result;
   };
   public validateEmail = async (ctx: Context<{ email: string }>) => {
     try {

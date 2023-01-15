@@ -46,7 +46,6 @@
     "@types/node": "^13.13.52",
     "bcrypt": "^5.1.0",
     "dotenv": "^16.0.3",
-    "email-validator": "^2.0.4",
     "fakerator": "^0.3.6",
     "ioredis": "^4.14.1",
     "joi": "^17.7.0",

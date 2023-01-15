@@ -5,7 +5,8 @@ const SendMailDtoSchema: any = Joi.object().keys({
   receiver: Joi.string().required(),
   subject: Joi.string().required(),
   content: Joi.string(),
-  template: Joi.toString(),
+  template: Joi.string(),
+  payload: Joi.object(),
 });
 
 interface SendMailDto{
@@ -13,6 +14,7 @@ interface SendMailDto{
   subject: string;
   content?: string;
   template?: string;
+  payload?: any;
 }
 
 export {

@@ -20,7 +20,7 @@ export default class MailerService extends Service {
 						path: "/single",
 					},
 					params: SendMailDtoSchema,
-					handler: () => "",
+					handler: this.action.sendSingleMail,
 				},
 				validateMail: {
 					rest: {
@@ -30,7 +30,7 @@ export default class MailerService extends Service {
 					params: {
 						email: "string",
 					},
-					handler: () => "",
+					handler: this.action.validateEmail,
 				},
 			},
 		});

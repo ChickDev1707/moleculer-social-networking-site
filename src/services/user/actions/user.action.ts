@@ -3,7 +3,6 @@ import * as bcrypt from "bcrypt";
 import Record from "neo4j-driver-core/types/record";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
-import * as EmailValidator from "email-validator";
 import { IApiResponse } from "../../../../configs/api.type";
 import { LoginDto } from "../dtos/login.dto";
 import { UserRepository } from "../repository/user.repository";
@@ -13,6 +12,7 @@ import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
+import { SendMailDto } from "../../mailer/dtos/send-mail.dto";
 
 dotenv.config();
 
@@ -42,22 +42,29 @@ export class UserAction {
         throw new Errors.MoleculerClientError("Username already exists", 400);
       }
 
-      if (EmailValidator.validate(ctx.params.username)) {
-        // Is email
-        const isEmailValid = await ctx.broker.call("mailer.validateMail", { email: ctx.params.username });
-      }
-
+      // Check if email address exists
+      const isValidEmail = await ctx.broker.call("mailer.validateMail", { email: ctx.params.username });
+      if (!isValidEmail) {
+        throw new Errors.MoleculerClientError("Invalid email", 400);
+      };
       // Hash password to store in db
       const SALT = 12;
       const hashedPassword = await bcrypt.hash(registerDto.password, SALT);
       registerDto.password = hashedPassword;
 
-      const newUser: Record = await this.userRepo.createUserWithAccount(registerDto);
+      const result: any = await this.userRepo.createUserWithAccount(registerDto);
+      const sendMailParams: SendMailDto = {
+        receiver: ctx.params.username,
+        subject: "Verify account",
+        template: "verification",
+        payload: { accountId: result },
+      };
+      console.log(sendMailParams);
+      await ctx.broker.call("mailer.sendMail", sendMailParams);
 
       return {
         code: 201,
         message: "Registration success",
-        data: newUser,
       };
     } catch (error) {
       handleError(error);
