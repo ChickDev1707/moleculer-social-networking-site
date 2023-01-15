@@ -23,14 +23,18 @@ module.exports = {
   },
   address: {
     type: "string",
+    default: "",
   },
   avatar: {
     type: "string",
+    default: "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg",
   },
   followers: {
-    type: "string",
+    type: "number",
+    default: 0,
   },
   followings: {
-    type: "string",
+    type: "number",
+    default: 0,
   },
 };
