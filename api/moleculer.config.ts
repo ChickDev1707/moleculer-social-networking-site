@@ -39,7 +39,7 @@ const brokerConfig: BrokerOptions  = {
 	// More info: https://moleculer.services/docs/0.14/networking.html
 	// Note: During the development, you don't need to define it because all services will be loaded locally.
 	// In production you can set it via `TRANSPORTER=nats://localhost:4222` environment variable.
-	transporter: "nats://localhost:4222", // "NATS"
+	transporter: process.env.TRANSPORTER || "nats://localhost:4222", // "NATS"
 
 	// Define a cacher.
 	// More info: https://moleculer.services/docs/0.14/caching.html
@@ -132,26 +132,6 @@ const brokerConfig: BrokerOptions  = {
 
 	// Global error handler
 	errorHandler: null,
-
-	// Enable/disable built-in metrics function. More info: https://moleculer.services/docs/0.14/metrics.html
-	metrics: {
-		enabled: true,
-		// Available built-in reporters: "Console", "CSV", "Event", "Prometheus", "Datadog", "StatsD"
-		reporter: {
-			type: "Prometheus",
-			options: {
-				// HTTP port
-				port: 3030,
-				// HTTP URL path
-				path: "/metrics",
-				// Default labels which are appended to all metrics labels
-				defaultLabels: (registry: { broker: { namespace: any; nodeID: any } }) => ({
-					namespace: registry.broker.namespace,
-					nodeID: registry.broker.nodeID,
-				}),
-			},
-		},
-	},
 
 	// Enable built-in tracing function. More info: https://moleculer.services/docs/0.14/tracing.html
 	tracing: {
