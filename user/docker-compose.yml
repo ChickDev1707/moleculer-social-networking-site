@@ -1,0 +1,31 @@
+version: "3.3"
+services:
+  user-service:
+    build: 
+      context: .
+    image: node:16-alpine
+    env_file: docker-compose.env
+    container_name: chat-service
+    depends_on:
+      - user-db
+    networks:
+      - internal
+
+  user-db:
+    image: neo4j:latest
+    container_name: user-db
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./volume/import:/import
+      - ./volume/data:/data
+    env_file: docker-compose.env
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  data:
