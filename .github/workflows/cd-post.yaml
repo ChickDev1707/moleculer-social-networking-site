@@ -1,4 +1,4 @@
-name: Chat service deployment
+name: Post service deployment
 on:
   push:
     paths:
