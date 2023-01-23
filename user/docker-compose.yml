@@ -5,7 +5,7 @@ services:
       context: .
     image: node:16-alpine
     env_file: docker-compose.env
-    container_name: chat-service
+    container_name: user-service
     depends_on:
       - user-db
     networks:
