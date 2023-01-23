@@ -1,0 +1,26 @@
+version: "3.3"
+services:
+  post-service:
+    build: 
+      context: .
+    image: node:16-alpine
+    env_file: docker-compose.env
+    container_name: post-service
+    depends_on:
+      - post-db
+    networks:
+      - internal
+
+  post-db:
+    image: mongo:latest
+    container_name: post-db
+    ports:
+      - 5200:27017
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  data:
