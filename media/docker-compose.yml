@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  # api gateway
+  media-service:
+    build: 
+      context: .
+    image: node:16-alpine
+    env_file: docker-compose.env
+    container_name: media-service
+    depends_on:
+      - media-db
+    networks:
+      - internal
+
+  media-store:
+    image: quay.io/minio/minio
+    container_name: media-store
+    ports:
+      - 9000:9000
+      - 9090:9090
+    env_file: docker-compose.env
+    command: server /data --console-address ":9090"
+    volumes:
+      - ./docker/volumes/data:/data
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  data:

@@ -7,7 +7,7 @@ import { IApiResponse } from "../types/api.type";
 import { LoginDto } from "../dtos/login.dto";
 import { UserRepository } from "../repository/user.repository";
 import { RegisterDto } from "../dtos/register.dto";
-import { handleError } from "../utils/erros.util";
+import { handleError } from "../utils/error.util";
 import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
