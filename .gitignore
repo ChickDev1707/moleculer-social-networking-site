@@ -68,3 +68,6 @@ dist/
 
 # user data volume
 /docker/volumes
+/user
+/post
+/media
