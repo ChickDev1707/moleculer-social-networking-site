@@ -28,6 +28,19 @@ export default class UserService extends Service {
 					params: { userId: "string" },
 					handler: this.userAction.getUserInfo,
 				},
+				// Search user
+				/**
+				 * Search other users
+				 * @param {params} params
+				 */
+				searchUsers: {
+					rest: {
+						method: "GET",
+						path: "/:input",
+					},
+					params: {input: "string"},
+					handler: this.userAction.searchUsers,
+				},
 				// Follow
 				/**
 				 * Follow other users

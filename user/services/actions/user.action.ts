@@ -29,6 +29,19 @@ export class UserAction {
       handleError(error);
     }
   };
+  // Search user
+  public searchUsers = async (ctx: Context<{input: string}>): Promise<IApiResponse> => {
+    try {
+      const users: UserModel.User[] = await this.userRepo.searchUsers(ctx.params.input);
+      return {
+        code: 200,
+        message: "Get user success",
+        data: users,
+      };
+    } catch (error) {
+      handleError(error);
+    }
+  };
   // Auth
   public register = async (ctx: Context<RegisterDto>): Promise<IApiResponse> => {
     try {
