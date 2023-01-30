@@ -67,7 +67,6 @@ typings/
 dist/
 
 # user data volume
-/docker/volumes
+/media
 /user
 /post
-/media
