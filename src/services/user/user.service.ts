@@ -16,6 +16,14 @@ export default class UserService extends Service {
 			name: "users",
 			actions: {
 				// Profile
+				searchUsers: {
+					rest: {
+						method: "GET",
+						path: "/:input",
+					},
+					params: {input: "string"},
+					handler: this.userAction.searchUsers,
+				},
 				/**
 				 * Follow other users
 				 * @param {params} params
@@ -97,6 +105,16 @@ export default class UserService extends Service {
 					},
 					params: RegisterDtoSchema,
 					handler: this.userAction.register,
+				},
+				validateAccount: {
+					rest: {
+						method: "GET",
+						path: "/validate",
+					},
+					params: {
+						accountId: "string",
+					},
+					handler: this.userAction.validateAccount,
 				},
 			},
 		});

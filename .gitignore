@@ -68,5 +68,5 @@ dist/
 
 # user data volume
 /media
-/post
 /user
+/post

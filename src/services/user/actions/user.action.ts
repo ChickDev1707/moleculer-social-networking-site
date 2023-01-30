@@ -1,6 +1,6 @@
 import { Context, Errors } from "moleculer";
 import * as bcrypt from "bcrypt";
-import Record from "neode/node_modules/neo4j-driver-core/types/record";
+import Record from "neo4j-driver-core/types/record";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import { IApiResponse } from "../../../../configs/api.type";
@@ -12,12 +12,15 @@ import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
+import { SendMailDto } from "../../mailer/dtos/send-mail.dto";
+import { AccountStatus } from "../enums/account-status.enum";
+
 dotenv.config();
 
 export class UserAction {
   private userRepo = new UserRepository();
   // User profile
-  public getUserInfo = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getUserInfo = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const user: UserModel.User = await this.userRepo.findUserById(ctx.params.userId);
       return {
@@ -40,17 +43,29 @@ export class UserAction {
         throw new Errors.MoleculerClientError("Username already exists", 400);
       }
 
+      // Check if email address exists
+      const isValidEmail = await ctx.broker.call("mailer.validateMail", { email: ctx.params.username });
+      if (!isValidEmail) {
+        throw new Errors.MoleculerClientError("Invalid email", 400);
+      };
       // Hash password to store in db
       const SALT = 12;
       const hashedPassword = await bcrypt.hash(registerDto.password, SALT);
       registerDto.password = hashedPassword;
 
-      const newUser: Record = await this.userRepo.createUserWithAccount(registerDto);
+      const result: any = await this.userRepo.createUserWithAccount(registerDto);
+      const sendMailParams: SendMailDto = {
+        receiver: ctx.params.username,
+        subject: "Verify account",
+        template: "verification",
+        payload: { accountId: result },
+      };
+      console.log(sendMailParams);
+      await ctx.broker.call("mailer.sendMail", sendMailParams);
 
       return {
         code: 201,
         message: "Registration success",
-        data: newUser,
       };
     } catch (error) {
       handleError(error);
@@ -69,6 +84,10 @@ export class UserAction {
       if (!isValidated) {
         throw new Errors.MoleculerClientError("Wrong password!", 401);
       }
+
+      if (account.status !== AccountStatus.ACTIVE) {
+        throw new Errors.MoleculerClientError("Your account is not active yet", 401);
+      }
       const [accessToken] = this.generateTokens(user.id);
 
       return {
@@ -80,13 +99,24 @@ export class UserAction {
       handleError(error);
     }
   };
+  public validateAccount = async (ctx: Context<{accountId: string}>): Promise<IApiResponse> => {
+    try{
+      await this.userRepo.activateAccount(ctx.params.accountId);
+      return {
+        code: 200,
+        message: "Your account has been activated",
+      };
+    }catch(error){
+      handleError(error);
+    }
+  };
   // Follow actions
   public editFollowing = async (ctx: Context<FollowingDto>): Promise<IApiResponse> => {
     try {
       const hasFollowed: boolean = await this.userRepo.checkHasFollowed(ctx.params);
-      if(ctx.params.actionType === FollowingAction.FOLLOW){
+      if (ctx.params.actionType === FollowingAction.FOLLOW) {
         return this.follow(ctx.params, hasFollowed);
-      }else{
+      } else {
         return this.unFollow(ctx.params, hasFollowed);
       }
     } catch (error) {
@@ -94,7 +124,7 @@ export class UserAction {
     }
   };
   public follow = async (followingDto: FollowingDto, hasFollowed: boolean): Promise<IApiResponse> => {
-    if(hasFollowed){
+    if (hasFollowed) {
       throw new Errors.MoleculerClientError("You have already followed this user", 400);
     }
     await this.userRepo.addFollowing(followingDto);
@@ -106,7 +136,7 @@ export class UserAction {
   };
 
   public unFollow = async (followingDto: FollowingDto, hasFollowed: boolean): Promise<IApiResponse> => {
-    if(!hasFollowed){
+    if (!hasFollowed) {
       throw new Errors.MoleculerClientError("You didn't follow this user", 400);
     }
     await this.userRepo.deleteFollowing(followingDto);
@@ -118,7 +148,7 @@ export class UserAction {
   };
 
   // Read followings/followers
-  public getFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getFollowings = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const followings: UserModel.User[] = await this.userRepo.getFollowings(ctx.params.userId);
       return {
@@ -131,7 +161,7 @@ export class UserAction {
     }
   };
 
-  public getFollowers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getFollowers = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const followers: UserModel.User[] = await this.userRepo.getFollowers(ctx.params.userId);
       return {
@@ -144,7 +174,7 @@ export class UserAction {
     }
   };
 
-  public getAvailableUsers = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getAvailableUsers = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const users: UserModel.User[] = await this.userRepo.getAvailableUsers(ctx.params.userId);
       return {
@@ -157,7 +187,7 @@ export class UserAction {
     }
   };
 
-  public getRecommendedFollowings = async (ctx: Context<{userId: string}>): Promise<IApiResponse> => {
+  public getRecommendedFollowings = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
     try {
       const users: MutualFollowingsPayload[] = await this.userRepo.getRecommendedFollowings(ctx.params.userId);
       return {

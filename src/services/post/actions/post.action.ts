@@ -6,6 +6,7 @@ import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../../../../configs/api.type";
 import { LikePostDto } from "../dtos/like-post.dto";
 import { UpdatePostDto } from "../dtos/update-post.dto";
+import { getHomePostsDto } from "../dtos/get-home-posts.dto";
 
 export default class PostAction {
 	private postRepo: PostRepository;
@@ -13,16 +14,27 @@ export default class PostAction {
 		this.postRepo = new PostRepository(connection);
 	}
 
-	public getHomePosts = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
+	public getHomePosts = async (ctx: Context<getHomePostsDto>): Promise<IApiResponse> => {
 		try {
+			const pageNumber = ctx.params.pageNumber;
+			const pageSize: number = 10;
+			let finalPosts = [];
+
 			// Call User service to get list following user
 			const listFollowings: IApiResponse = await ctx.broker.call("users.getFollowings", { userId: ctx.params.userId });
 			const posts = await this.postRepo.getFollowingsPosts(listFollowings.data);
-			const finalPosts = [];
+
+			// Populate user id --> user
 			for (const post of posts) {
 				const finalPost = await getFullDetailPost(ctx, post);
 				finalPosts.push(finalPost);
 			}
+
+			// Panigation
+			const start: number = (pageNumber - 1) * pageSize;
+			const end: number = pageNumber * pageSize;
+			finalPosts = finalPosts.slice(start, end);
+
 			return {
 				message: "Successful request",
 				code: 200,
