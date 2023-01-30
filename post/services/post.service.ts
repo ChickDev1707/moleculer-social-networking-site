@@ -25,7 +25,10 @@ export default class PostService extends Service {
 						method: "GET",
 						path: "/home",
 					},
-					params: { userId: "string" },
+					params: {
+						userId: "string",
+						pageNumber: "number",
+					},
 					handler: this.postAct.getHomePosts,
 				},
 				// Get all post of a user
@@ -166,4 +169,3 @@ export default class PostService extends Service {
 		});
 	}
 }
-
