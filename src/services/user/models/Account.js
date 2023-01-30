@@ -10,4 +10,7 @@ module.exports = {
   password: {
     type: "string",
   },
+  status: {
+    type: "string",
+  },
 };

@@ -4,7 +4,7 @@ services:
   api:
     build:
       context: .
-    image: node:16-alpine
+    image: moleculer/demo
     env_file: docker-compose.env
     environment:
       SERVICES: api
@@ -22,7 +22,7 @@ services:
   user:
     build:
       context: .
-    image: node:16-alpine
+    image: moleculer/demo
     env_file: docker-compose.env
     environment:
       SERVICES: user
@@ -36,7 +36,7 @@ services:
   post:
     build:
       context: .
-    image: moleculer-demo
+    image: moleculer/demo
     env_file: docker-compose.env
     environment:
       SERVICES: post
