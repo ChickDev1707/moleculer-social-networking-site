@@ -30,8 +30,7 @@ export default class MediaAction {
   };
   public removeFiles = async (ctx: Context<{images: string[]}>): Promise<IApiResponse> => {
     try {
-      const regex = /image-\d+/;
-      const fileNames = ctx.params.images.map((image: string)=> regex.exec(image)[0]);
+      const fileNames = this.getImagesFilenames(ctx.params.images);
       await this.minioClient.removeObjects("images", fileNames);
       return {
         message: "Removed image",
@@ -42,5 +41,15 @@ export default class MediaAction {
       handleError(err);
     }
   };
-
+  private getImagesFilenames = (images: string[]): string[] => {
+    try{
+      const regex = /image-\d+/;
+      const fileNames = images.map((image: string)=> regex.exec(image)[0]);
+      return fileNames;
+    }catch{
+      // Fail parsing image - images might not exist in storage
+      // Use for url image
+      return []
+    }
+  }
 };
