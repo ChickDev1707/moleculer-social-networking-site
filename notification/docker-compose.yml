@@ -1,0 +1,26 @@
+version: "3.3"
+services:
+  notification-service:
+    build: 
+      context: .
+    image: node:16-alpine
+    env_file: docker-compose.env
+    container_name: notification-service
+    depends_on:
+      - notification-db
+    networks:
+      - internal
+
+  notification-db:
+    image: mongo:latest
+    container_name: notification-db
+    ports:
+      - 5300:27017
+    networks:
+      - internal
+
+networks:
+  internal:
+
+volumes:
+  data:
