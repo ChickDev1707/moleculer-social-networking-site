@@ -14,6 +14,7 @@ export default class NotificationAction {
 
 	public createNotificationVoid = async (broker: any, data: INotificationCrtDTO): Promise<IApiResponse> =>{
 		try {
+			broker.logger.error(data);
 			const newNotificationDTO: INotificationDTO = {
 				from: data.from,
 				to: data.to,
@@ -50,6 +51,7 @@ export default class NotificationAction {
 				data: resNotification,
 			};
 		} catch (error) {
+			broker.logger.error(error);
 			throw new Errors.MoleculerError("Internal server error", 500);
 		}
 	};

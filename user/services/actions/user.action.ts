@@ -12,6 +12,7 @@ import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
+import { TypeNotification } from "../enums/type-notification.enum";
 dotenv.config();
 
 export class UserAction {
@@ -98,6 +99,15 @@ export class UserAction {
     try {
       const hasFollowed: boolean = await this.userRepo.checkHasFollowed(ctx.params);
       if(ctx.params.actionType === FollowingAction.FOLLOW){
+        if(!hasFollowed){      
+          ctx.broker.broadcast("notification.create", {
+            from: ctx.params.userId,
+            to: ctx.params.targetId,
+            type: TypeNotification.FOLLOW,
+            content: "Đã theo dõi bạn",
+            link: `/user/${ctx.params.userId}`,
+          });
+        }
         return this.follow(ctx.params, hasFollowed);
       }else{
         return this.unFollow(ctx.params, hasFollowed);

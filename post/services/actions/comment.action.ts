@@ -6,6 +6,7 @@ import { ICommentDTO } from "../dtos/comment.dto";
 import { CommentRepository } from "../repository/comment.repository";
 import { PostRepository } from "../repository/post.repository";
 import { IApiResponse } from "../types/api.type";
+import { TypeNotification } from "../enum/type-notification.enum";
 
 export default class CommentAction {
 	private postRepo: PostRepository;
@@ -65,6 +66,20 @@ export default class CommentAction {
 			};
 			// Popupate user
 			const finalNewComment = await getFullDetailComment(ctx, newComment);
+
+			ctx.broker.logger.error(finalNewComment);
+			
+			//Create notification
+			if(finalNewComment.user.id != finalNewComment.postUserId){
+				ctx.broker.broadcast("notification.create", {
+					from: finalNewComment.user.id,
+					to: finalNewComment.postUserId,
+					type: TypeNotification.COMMENT,
+					content: "Đã bình luận bài viết của bạn",
+					link: `/user/${ctx.params.userId}`,
+				});
+			}
+
 			return {
 				message: "Successful request",
 				code: 200,
@@ -115,6 +130,17 @@ export default class CommentAction {
 		try {
 			const { userId, commentId } = ctx.params;
 			const likedComment = await this.commentRepo.likeComment(commentId, userId);
+
+			if(userId != likedComment.postUserId){
+				ctx.broker.broadcast("notification.create", {
+					from: userId,
+					to: likedComment.user,
+					type: TypeNotification.LIKE_COMMENT,
+					content: "Đã thích bình luận của bạn",
+					link: `/user/${ctx.params.userId}`,
+				});
+			}
+
 			return {
 				message: "liked comment",
 				code: 200,
