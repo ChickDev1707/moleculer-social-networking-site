@@ -36,7 +36,7 @@ export default class UserService extends Service {
 				searchUsers: {
 					rest: {
 						method: "GET",
-						path: "/:input",
+						path: "/",
 					},
 					params: {input: "string"},
 					handler: this.userAction.searchUsers,

@@ -87,7 +87,6 @@ export class MessageRepository {
 			{ $push: { reactBy: reactData.reactBy } },
 			{ new: true }
 		);
-		console.log(updatedMessage);
 		return updatedMessage;
 	}
 

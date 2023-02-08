@@ -31,7 +31,6 @@ export default class MailerAction {
       }
       if (ctx.params.template) {
         const rootPath = path.resolve("./");
-        console.log(rootPath)
         let data = fs.readFileSync(`${rootPath}/public/mail-template/${ctx.params.template}.html`, "utf8");
         data = data.replace("{{verify-link}}", `http://localhost:3000/api/users/validate?accountId=${ctx.params.payload?.accountId}`);
         mailOptions.html = data;

@@ -187,7 +187,6 @@ export class UserRepository {
   public async searchUsers(input: string): Promise<UserModel.User[]> {
     const query: string = "MATCH (User) WHERE User.name =~ '(?i)"+ input + ".*' RETURN User LIMIT 10";
     const result= await this.instance.cypher(query, {input});
-    console.log(result);
     if (result.records.length === 0) {
       return [];
     }
