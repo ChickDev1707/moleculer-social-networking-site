@@ -5,15 +5,15 @@ import { Types } from "mongoose";
 const UpdatePostDtoSchema: any = Joi.object().keys({
   postId: Joi.string().required(),
   content: Joi.string(),
-  oldImages: Joi.array(),
-  images: Joi.array(),
+  oldMedia: Joi.array(),
+  newMedia: Joi.array(),
 });
 
 interface UpdatePostDto{
   postId: Types.ObjectId;
   content: string;
-  oldImages: string[];
-  images: string[];
+  oldMedia: string[];
+  newMedia: string[];
 }
 
 export {

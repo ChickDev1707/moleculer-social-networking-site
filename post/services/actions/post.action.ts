@@ -93,13 +93,13 @@ export default class PostAction {
 
 	public updatePost = async (ctx: Context<UpdatePostDto>): Promise<IApiResponse> => {
 		try {
-			const { postId, content, oldImages, images } = ctx.params;
+			const { postId, content, oldMedia, newMedia } = ctx.params;
 
-			const deletedImages = oldImages.filter((image: string) => !images.includes(image));
+			const deletedMedia = oldMedia.filter((image: string) => !newMedia.includes(image));
 
-			await ctx.broker.call("media.removeFiles", { images: deletedImages });
+			await ctx.broker.call("media.remove", { media: deletedMedia });
 
-			const updatedPost = await this.postRepo.updatePost(postId, content, images);
+			const updatedPost = await this.postRepo.updatePost(postId, content, newMedia);
 
 			return {
 				message: "Updated post",
