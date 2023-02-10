@@ -21,13 +21,13 @@ export default class MediaService extends Service {
 					},
 					handler: this.action.saveFile,
 				},
-				removeFiles: {
+				remove: {
 					rest: {
 						method: "POST",
 						path: "/remove",
 					},
-					params: { images: "array" },
-					handler: this.action.removeFiles,
+					params: { media: "array" },
+					handler: this.action.removeMedia,
 				},
 			},
 

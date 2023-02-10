@@ -1,5 +1,6 @@
 import { Client } from "minio";
-import { Context } from "moleculer";
+import { Context, Errors } from "moleculer";
+import { Readable } from "stream";
 import { IApiResponse } from "../types/api.type";
 import { handleError } from "../utils/error.util";
 
@@ -16,24 +17,40 @@ export default class MediaAction {
 
   public saveFile = async (ctx: any): Promise<IApiResponse> => {
     try {
-      const imageName = `image-${Date.now()}`;
-      await this.minioClient.putObject("images", imageName, ctx.params);
-      const imageUrl = await this.minioClient.presignedGetObject("images", imageName);
-      return {
-        message: "Saved image",
-        code: 200,
-        data: imageUrl,
-      };
+      const [type, extension] = ctx.meta.mimetype.split('/');
+      if (this.isSupportedMimetype(type)) {
+        const fileUrl = await this.saveFileToMinio(ctx.params, { type, extension })
+        return {
+          message: "Saved file",
+          code: 200,
+          data: fileUrl,
+        };
+      } else {
+        throw new Errors.MoleculerClientError("Unsupported media type", 415)
+      }
     } catch (err) {
       handleError(err);
     }
   };
-  public removeFiles = async (ctx: Context<{images: string[]}>): Promise<IApiResponse> => {
+
+  private async saveFileToMinio(file: Readable, meta: any) {
+    const fileName: string = `${meta.type}-${Date.now()}.${meta.extension}`;
+    await this.minioClient.putObject('store', fileName, file);
+    const fileUrl = await this.minioClient.presignedGetObject('store', fileName);
+    return fileUrl
+  }
+
+  private isSupportedMimetype(mimetype: string) {
+    return mimetype === 'video' || mimetype === 'image'
+  }
+
+  public removeMedia = async (ctx: Context<{ media: string[] }>): Promise<IApiResponse> => {
     try {
-      const fileNames = this.getImagesFilenames(ctx.params.images);
-      await this.minioClient.removeObjects("images", fileNames);
+      console.log(ctx.params.media)
+      const fileNames = this.getMediaFilenames(ctx.params.media);
+      await this.minioClient.removeObjects("store", fileNames);
       return {
-        message: "Removed image",
+        message: "Removed media",
         code: 200,
         data: null,
       };
@@ -41,12 +58,12 @@ export default class MediaAction {
       handleError(err);
     }
   };
-  private getImagesFilenames = (images: string[]): string[] => {
-    try{
-      const regex = /image-\d+/;
-      const fileNames = images.map((image: string)=> regex.exec(image)[0]);
+  private getMediaFilenames = (media: string[]): string[] => {
+    try {
+      const regex = /(\w+)-(.*)\.(\w+)/; // format: name-date.extension
+      const fileNames = media.map((url: string) => regex.exec(url)[0]);
       return fileNames;
-    }catch{
+    } catch {
       // Fail parsing image - images might not exist in storage
       // Use for url image
       return []
