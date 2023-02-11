@@ -7,6 +7,7 @@ import { IApiResponse } from "../types/api.type";
 import { LikePostDto } from "../dtos/like-post.dto";
 import { UpdatePostDto } from "../dtos/update-post.dto";
 import { getHomePostsDto } from "../dtos/get-home-posts.dto";
+import { TypeNotification } from "../enum/type-notification.enum";
 
 export default class PostAction {
 	private postRepo: PostRepository;
@@ -130,6 +131,18 @@ export default class PostAction {
 	public likePost = async (ctx: Context<LikePostDto>): Promise<IApiResponse> => {
 		try {
 			const likedPost = await this.postRepo.likePost(ctx.params);
+
+			if(ctx.params.userId != likedPost.user){
+				//Create notification
+				ctx.broker.broadcast("notification.create", {
+					from: ctx.params.userId,
+					to: likedPost.user,
+					type: TypeNotification.LIKE_POST,
+					content: "Đã thích bài viết của bạn",
+					link: `/user/${ctx.params.userId}`,
+				});
+			}
+
 			return {
 				message: "Liked post",
 				code: 200,

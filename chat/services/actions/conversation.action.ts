@@ -217,22 +217,6 @@ export default class ConversationAction {
 
 	public getUserConversations = async (ctx: Context<{ userId: string }>): Promise<IApiResponse> => {
 		try {
-
-			ctx.broker.broadcast("notification.create", {
-				from: "0bc3dec0-86b2-11ed-875b-33035bd67a1b",
-				to: "0bc3dec0-86b2-11ed-875b-33035bd67a1b",
-				type: TypeNotification.FOLLOW,
-				content: "Đã theo dõi bạn",
-				link: "/",
-			});
-			ctx.broker.broadcast("notification.create", {
-				from: "0bc3dec0-86b2-11ed-875b-33035bd67a1b",
-				to: "0bc3dec0-86b2-11ed-875b-33035bd67a1b",
-				type: TypeNotification.COMMENT,
-				content: "Đã theo dõi bạn",
-				link: "/",
-			});
-
 			// Const userId = ctx.call("", ctx.params.requestToken);
 			const userId = ctx.params.userId;
 			const conversations =

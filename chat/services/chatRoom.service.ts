@@ -8,7 +8,12 @@ export default class MessageService extends Service {
 			actions: {
 				join: {
 					handler: ctx => {
-						ctx.meta.$join = ctx.params.join;
+						ctx.broker.logger.error("rooms", ctx.meta.$rooms, ctx.params.join)
+						if(ctx.meta.$rooms.indexOf(ctx.params.join)< 0){
+							ctx.meta.$join = ctx.params.join;
+							ctx.broker.logger.error("join room")
+						}
+						ctx.broker.logger.error("has room")
 					},
 				},
 				leave: {
