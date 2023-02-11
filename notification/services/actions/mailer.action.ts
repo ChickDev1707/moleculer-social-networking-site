@@ -31,9 +31,11 @@ export default class MailerAction {
       }
       if (ctx.params.template) {
         const rootPath = path.resolve("./");
-        let data = fs.readFileSync(`${rootPath}/public/mail-template/${ctx.params.template}.html`, "utf8");
-        data = data.replace("{{verify-link}}", `http://localhost:3000/api/users/validate?accountId=${ctx.params.payload?.accountId}`);
-        mailOptions.html = data;
+        let template = fs.readFileSync(`${rootPath}/public/mail-template/${ctx.params.template}.html`, "utf8");
+        if(ctx.params.payload){
+          template = this.getTemplateWithData(template, ctx.params.payload)
+        }
+        mailOptions.html = template;
       }
       const result = await this.transporter.sendMail(mailOptions);
       return result;
@@ -41,6 +43,14 @@ export default class MailerAction {
       handleError(error);
     }
   };
+  private getTemplateWithData(template: string, payload: any){
+    // convention: {{key}} in template
+    for(let key in Object.keys(payload)){
+      const keyRegex = new RegExp(`{{${key}}}`)
+      template = template.replace(keyRegex, payload['key'])
+    }
+    return template
+  }
   public validateEmail = async (ctx: Context<{ email: string }>) => {
     try {
       const api = `https://emailvalidation.abstractapi.com/v1/?api_key=${process.env.MAILER_VALIDATION_API_KEY}&email=${ctx.params.email}`;

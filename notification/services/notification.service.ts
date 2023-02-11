@@ -7,7 +7,7 @@ dotenv.config();
 
 export default class MessageService extends Service {
 	private dbConnection: Connection = mongoose.createConnection(process.env.NOTIFICATION_DB_URI);
-	private conversationAct: NotificationAction = new NotificationAction(this.dbConnection);
+	private notificationAct: NotificationAction = new NotificationAction(this.dbConnection);
 
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
@@ -16,19 +16,19 @@ export default class MessageService extends Service {
 			events: {
         // Subscribe to "notification.create" event
         "notification.create"(notification: INotificationCrtDTO) {
-					this.conversationAct.createNotificationVoid(broker, notification);
+					this.notificationAct.createNotificationVoid(broker, notification);
         },
 			},
 			actions: {
 				/**
 				 * Create notification for  a user
 				 */
-				createConversation: {
+				createNotification: {
 					rest: {
 						method: "POST",
 						path: "/",
 					},
-					handler: this.conversationAct.createNotification,
+					handler: this.notificationAct.createNotification,
 				},
 				/**
 				 * Get notification of a specific user by user id
@@ -37,7 +37,7 @@ export default class MessageService extends Service {
 				 * @param pageSize
 				 * @return notification[]
 				 */
-				getUserConversations: {
+				getUserNotifications: {
 					rest: {
 						method: "GET",
 						path: "/",
@@ -45,14 +45,14 @@ export default class MessageService extends Service {
 					params: {
 						userId: "string",
 					},
-					handler: this.conversationAct.getUserNotification,
+					handler: this.notificationAct.getUserNotification,
 				},
 				markAsRead: {
 					rest: {
 						method: "PATCH",
 						path: "/:id/markAsRead",
 					},
-					handler: this.conversationAct.markAsReadNotification,
+					handler: this.notificationAct.markAsReadNotification,
 				},
 				/**
 				 * Get notification of a specific user by user id
@@ -66,21 +66,21 @@ export default class MessageService extends Service {
 						method: "PATCH",
 						path: "/markAsReadAll",
 					},
-					handler: this.conversationAct.markAsReadAllNotification,
+					handler: this.notificationAct.markAsReadAllNotification,
 				},
 				markAsUnread: {
 					rest: {
 						method: "PATCH",
 						path: "/:id/markAsUnread",
 					},
-					handler: this.conversationAct.markAsUnReadNotification,
+					handler: this.notificationAct.markAsUnReadNotification,
 				},
 				deleteNotification: {
 					rest: {
 						method: "DELETE",
 						path: "/:id",
 					},
-					handler: this.conversationAct.DeleteNotification,
+					handler: this.notificationAct.DeleteNotification,
 				},
 			},
 		});

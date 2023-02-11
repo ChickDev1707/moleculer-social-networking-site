@@ -1,9 +1,10 @@
 /* eslint-disable no-underscore-dangle */
-import { Context, Errors } from "moleculer";
+import { Context, Errors, ServiceBroker } from "moleculer";
 import { Connection } from "mongoose";
 import { IApiResponse } from "../types/api.type";
 import { INotificationCrtDTO, INotificationDTO, IResNotification } from "../dtos/notification.dto";
 import { NotificationRepository } from "../repository/notification.repository";
+import { SendMailDto } from "../dtos/send-mail.dto";
 
 export default class NotificationAction {
 	private notificationRepo: NotificationRepository;
@@ -12,7 +13,7 @@ export default class NotificationAction {
 		this.notificationRepo = new NotificationRepository(connection);
 	}
 
-	public createNotificationVoid = async (broker: any, data: INotificationCrtDTO): Promise<IApiResponse> =>{
+	public createNotificationVoid = async (broker: ServiceBroker, data: INotificationCrtDTO): Promise<IApiResponse> =>{
 		try {
 			broker.logger.error(data);
 			const newNotificationDTO: INotificationDTO = {
@@ -45,9 +46,14 @@ export default class NotificationAction {
 			};
 
 			broker.broadcast("notification.created", resNotification);
+
+			// send email
+			if(to.email){
+				this.sendNotificationEmail(broker, to.email);
+			}
 			return {
 				code: 201,
-				message: "Conversation was created",
+				message: "Notification was created",
 				data: resNotification,
 			};
 		} catch (error) {
@@ -55,7 +61,14 @@ export default class NotificationAction {
 			throw new Errors.MoleculerError("Internal server error", 500);
 		}
 	};
-
+	private sendNotificationEmail(broker: ServiceBroker, targetEmail: string){
+		const mailParams: SendMailDto = {
+			receiver: targetEmail,
+			subject: "test",
+			content: "test",
+		}
+		broker.call("mailer.sendMail", mailParams)
+	}
 	public createNotification = async (
 		ctx: Context<INotificationCrtDTO>
 	): Promise<IApiResponse> => {
@@ -92,7 +105,7 @@ export default class NotificationAction {
 
 			return {
 				code: 201,
-				message: "Conversation was created",
+				message: "Notification was created",
 				data: resNotification,
 			};
 		} catch (error) {
@@ -111,7 +124,7 @@ export default class NotificationAction {
 				{pageIndex = ctx.params.pageIndex;}
 			if(ctx.params.pageIndex)
 				{pageSize = ctx.params.pageSize;}
-			const updatedConversation = await this.notificationRepo.markAsReadNotificationOfUser(userId);
+			const updatedNotification = await this.notificationRepo.markAsReadNotificationOfUser(userId);
 
 			const notifications = await this.notificationRepo.getNotificationOfUser(userId, pageIndex, pageSize);
 			const resNotifications: IResNotification[] = [];
@@ -155,27 +168,27 @@ export default class NotificationAction {
 			}
 
 			notification.read = true;
-			const updatedConversation = await this.notificationRepo.updateNotification(notification._id.toString(), notification);
+			const updatedNotification = await this.notificationRepo.updateNotification(notification._id.toString(), notification);
 
-			const from  = (await ctx.broker.call("users.getUser", {userId: updatedConversation.from}) as IApiResponse).data;
-			const to  = (await ctx.broker.call("users.getUser", {userId: updatedConversation.to}) as IApiResponse).data;
+			const from  = (await ctx.broker.call("users.getUser", {userId: updatedNotification.from}) as IApiResponse).data;
+			const to  = (await ctx.broker.call("users.getUser", {userId: updatedNotification.to}) as IApiResponse).data;
 
 			const resNotification: IResNotification = {
-				_id: updatedConversation._id,
+				_id: updatedNotification._id,
 				from,
 				to,
-				type: updatedConversation.type,
-				content: updatedConversation.content,
-				link: updatedConversation.link,
-				read: updatedConversation.read,
-				deleted: updatedConversation.deleted,
-				createdAt: updatedConversation.createdAt,
-				updatedAt: updatedConversation.updatedAt,
+				type: updatedNotification.type,
+				content: updatedNotification.content,
+				link: updatedNotification.link,
+				read: updatedNotification.read,
+				deleted: updatedNotification.deleted,
+				createdAt: updatedNotification.createdAt,
+				updatedAt: updatedNotification.updatedAt,
 			};
 
 			return {
 				code: 201,
-				message: "Conversation was created",
+				message: "Notification was created",
 				data: resNotification,
 			};
 		} catch (error) {
@@ -197,27 +210,27 @@ export default class NotificationAction {
 			}
 
 			notification.read = false;
-			const updatedConversation = await this.notificationRepo.updateNotification(notification._id.toString(), notification);
+			const updatedNotification = await this.notificationRepo.updateNotification(notification._id.toString(), notification);
 
-			const from  = (await ctx.broker.call("users.getUser", {userId: updatedConversation.from}) as IApiResponse).data;
-			const to  = (await ctx.broker.call("users.getUser", {userId: updatedConversation.to}) as IApiResponse).data;
+			const from  = (await ctx.broker.call("users.getUser", {userId: updatedNotification.from}) as IApiResponse).data;
+			const to  = (await ctx.broker.call("users.getUser", {userId: updatedNotification.to}) as IApiResponse).data;
 
 			const resNotification: IResNotification = {
-				_id: updatedConversation._id,
+				_id: updatedNotification._id,
 				from,
 				to,
-				type: updatedConversation.type,
-				content: updatedConversation.content,
-				link: updatedConversation.link,
-				read: updatedConversation.read,
-				deleted: updatedConversation.deleted,
-				createdAt: updatedConversation.createdAt,
-				updatedAt: updatedConversation.updatedAt,
+				type: updatedNotification.type,
+				content: updatedNotification.content,
+				link: updatedNotification.link,
+				read: updatedNotification.read,
+				deleted: updatedNotification.deleted,
+				createdAt: updatedNotification.createdAt,
+				updatedAt: updatedNotification.updatedAt,
 			};
 
 			return {
 				code: 201,
-				message: "Conversation was created",
+				message: "Notification was created",
 				data: resNotification,
 			};
 		} catch (error) {
@@ -229,10 +242,10 @@ export default class NotificationAction {
 		ctx: Context<{ id: string }>
 	): Promise<IApiResponse> => {
 		try {
-			const updatedConversation = await this.notificationRepo.delete(ctx.params.id);
+			const updatedNotification = await this.notificationRepo.delete(ctx.params.id);
 			return {
 				code: 201,
-				message: "Conversation was deleted",
+				message: "Notification was deleted",
 				data: true,
 			};
 		} catch (error) {

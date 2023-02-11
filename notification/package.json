@@ -22,6 +22,8 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^13.13.52",
+    "@types/nodemailer": "^6.4.7",
+    "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "eslint": "^6.8.0",
@@ -41,6 +43,8 @@
     "moleculer-web": "^0.9.0",
     "mongoose": "^6.9.0",
     "nats": "^2.10.3",
+    "node-fetch": "^2.6.8",
+    "nodemailer": "^6.9.1",
     "typescript": "^3.8.3"
   },
   "engines": {
