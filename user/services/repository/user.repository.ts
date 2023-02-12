@@ -65,6 +65,10 @@ export class UserRepository {
     const result: Node<UserModel.User> = await this.instance.first<UserModel.User>("User", "id", id);
     return result ? result.properties() : null;
   }
+  public async activateAccount(id: string): Promise<void> {
+    const query = "MATCH (account: Account {id: $id}) SET account.status='active'";
+    await this.instance.writeCypher(query, { id });
+  }
 
   // Follow
   /**

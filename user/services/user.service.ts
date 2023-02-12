@@ -111,6 +111,16 @@ export default class UserService extends Service {
 					params: RegisterDtoSchema,
 					handler: this.userAction.register,
 				},
+				validateAccount: {
+					rest: {
+						method: "GET",
+						path: "/validate",
+					},
+					params: {
+						accountId: "string",
+					},
+					handler: this.userAction.validateAccount,
+				},
 			},
 		});
 	}

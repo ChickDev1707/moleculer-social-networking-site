@@ -1,6 +1,5 @@
 import { Context, Errors } from "moleculer";
 import * as bcrypt from "bcrypt";
-import Record from "neo4j-driver-core/types/record";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import { IApiResponse } from "../types/api.type";
@@ -14,6 +13,7 @@ import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
 import { TypeNotification } from "../enums/type-notification.enum";
 import { SendMailDto } from "../dtos/send-mail.dto";
+import { AccountStatus } from "../enums/account-status.enum";
 dotenv.config();
 
 export class UserAction {
@@ -55,6 +55,11 @@ export class UserAction {
         throw new Errors.MoleculerClientError("Username already exists", 400);
       }
 
+      const isValidEmail = await ctx.broker.call("mailer.validateMail", { email: ctx.params.username });
+      if (!isValidEmail) {
+        throw new Errors.MoleculerClientError("Invalid email", 400);
+      };
+
       // Hash password to store in db
       const SALT = 12;
       const hashedPassword = await bcrypt.hash(registerDto.password, SALT);
@@ -92,6 +97,10 @@ export class UserAction {
       if (!isValidated) {
         throw new Errors.MoleculerClientError("Wrong password!", 401);
       }
+      
+      if (account.status !== AccountStatus.ACTIVE) {
+        throw new Errors.MoleculerClientError("Your account is not active yet", 401);
+      }
       const [accessToken] = this.generateTokens(user.id);
 
       return {
@@ -100,6 +109,17 @@ export class UserAction {
         data: { user, accessToken },
       };
     } catch (error) {
+      handleError(error);
+    }
+  };
+  public validateAccount = async (ctx: Context<{accountId: string}>): Promise<IApiResponse> => {
+    try{
+      await this.userRepo.activateAccount(ctx.params.accountId);
+      return {
+        code: 200,
+        message: "Your account has been activated",
+      };
+    }catch(error){
       handleError(error);
     }
   };
