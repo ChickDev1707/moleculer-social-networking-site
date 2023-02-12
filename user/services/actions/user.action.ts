@@ -13,6 +13,7 @@ import { FollowingDto } from "../dtos/following.dto";
 import { FollowingAction } from "../enums/following-action.enum";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
 import { TypeNotification } from "../enums/type-notification.enum";
+import { SendMailDto } from "../dtos/send-mail.dto";
 dotenv.config();
 
 export class UserAction {
@@ -59,12 +60,20 @@ export class UserAction {
       const hashedPassword = await bcrypt.hash(registerDto.password, SALT);
       registerDto.password = hashedPassword;
 
-      const newUser: Record = await this.userRepo.createUserWithAccount(registerDto);
+      const accountId: string = await this.userRepo.createUserWithAccount(registerDto);
 
+      const sendMailParams: SendMailDto = {
+        receiver: ctx.params.username,
+        subject: "Verify account",
+        template: "verification",
+        payload: { verifyLink: `${process.env.ROOT_DOMAIN}/api/users/validate?accountId=${accountId}` },
+      };
+      await ctx.broker.call("mailer.sendMail", sendMailParams);
+  
       return {
         code: 201,
         message: "Registration success",
-        data: newUser,
+        data: accountId,
       };
     } catch (error) {
       handleError(error);

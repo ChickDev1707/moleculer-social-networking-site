@@ -8,6 +8,7 @@ import { RegisterDto } from "../dtos/register.dto";
 import { UserModel } from "../types/models";
 import { FollowingDto } from "../dtos/following.dto";
 import { MutualFollowingsPayload } from "../dtos/mutual-followings.dto";
+import { AccountStatus } from "../enums/account-status.enum";
 
 const userDir = dirname(__dirname);
 dotenv.config();
@@ -22,18 +23,25 @@ export class UserRepository {
    * @param registerDto
    * @returns newUser
    */
-  public async createUserWithAccount(registerDto: RegisterDto): Promise<Record> {
+  public async createUserWithAccount(registerDto: RegisterDto): Promise<string> {
     // Pick user data from register data
-    const userData: any = pick(registerDto, ["name", "gender", "dateOfBirth"]);
+    const userData: UserModel.User = {
+      id: uuidv1(),
+      email: registerDto.username,
+      followers: 0,
+      followings: 0,
+      avatar: "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg",
+      address: "",
+      ...pick(registerDto, ["name", "gender", "dateOfBirth"]),
+    };
     userData.id = uuidv1();
     // Pick account data from register data
-    const userAccount: any = pick(registerDto, ["username", "password"]);
-    userAccount.id = uuidv1();
+    const userAccount: UserModel.Account = { ...pick(registerDto, ["username", "password"]), id: uuidv1(), status: AccountStatus.UNVERIFIED };
 
     const query = "Create (:User $userData)-[:HAS]->(:Account $userAccount)";
-    const result = await this.instance.writeCypher(query, { userData, userAccount });
+    await this.instance.writeCypher(query, { userData, userAccount });
     // Final result is the result of the first batch
-    return result.records.length === 0 ? null : result.records[0];
+    return userAccount.id;
   }
 
   /**
@@ -185,8 +193,8 @@ export class UserRepository {
    * @returns user[]
    */
   public async searchUsers(input: string): Promise<UserModel.User[]> {
-    const query: string = "MATCH (User) WHERE User.name =~ '(?i)"+ input + ".*' RETURN User LIMIT 10";
-    const result= await this.instance.cypher(query, {input});
+    const query: string = "MATCH (User) WHERE User.name =~ '(?i)" + input + ".*' RETURN User LIMIT 10";
+    const result = await this.instance.cypher(query, { input });
     if (result.records.length === 0) {
       return [];
     }
