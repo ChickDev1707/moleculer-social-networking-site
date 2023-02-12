@@ -36,17 +36,12 @@ export class PostRepository {
 		return deletedPost;
 	}
 
-	public async getFollowingsPosts(listFollowings: any) {
+	public async getFollowingsPosts(listUserIdFollowings: string[], pageNumber: number) {
 		try {
 			let finalPosts: any[] = [];
-			for (const user of listFollowings) {
-				const posts = await this.PostModel.find({ user: user.id });
-				finalPosts = [...finalPosts, ...posts];
-			}
-			finalPosts = finalPosts.sort(
-				(objA, objB) => Number(objB.createdAt) - Number(objA.createdAt)
-			);
-			return finalPosts;
+			const limit = 10;
+			const posts = await this.PostModel.find({user: listUserIdFollowings}).limit(limit).skip((pageNumber - 1) * limit).sort({createdAt: -1}).exec();
+			return posts;
 		} catch (error) {
 			console.log(error);
 		}

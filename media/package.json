@@ -40,6 +40,7 @@
     "jsonwebtoken": "^9.0.0",
     "minio": "^7.0.32",
     "moleculer": "^0.14.0",
+    "moleculer-repl": "^0.7.3",
     "moleculer-web": "^0.9.0",
     "nats": "^2.10.3",
     "typescript": "^3.8.3"

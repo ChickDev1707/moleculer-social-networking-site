@@ -8,6 +8,7 @@ import { LikePostDto } from "../dtos/like-post.dto";
 import { UpdatePostDto } from "../dtos/update-post.dto";
 import { getHomePostsDto } from "../dtos/get-home-posts.dto";
 import { TypeNotification } from "../enum/type-notification.enum";
+import { any } from "joi";
 
 export default class PostAction {
 	private postRepo: PostRepository;
@@ -18,23 +19,23 @@ export default class PostAction {
 	public getHomePosts = async (ctx: Context<getHomePostsDto>): Promise<IApiResponse> => {
 		try {
 			const pageNumber = ctx.params.pageNumber;
-			const pageSize: number = 10;
 			let finalPosts = [];
+			let listUserIdFollowings: string[] = [];
 
 			// Call User service to get list following user
 			const listFollowings: IApiResponse = await ctx.broker.call("users.getFollowings", { userId: ctx.params.userId });
-			const posts = await this.postRepo.getFollowingsPosts(listFollowings.data);
+			for(const user of listFollowings.data){
+				listUserIdFollowings.push(user.id)
+			}
 
-			// Populate user id --> user
+			// find posts
+			const posts = await this.postRepo.getFollowingsPosts(listUserIdFollowings, pageNumber);
+
+			// Populate user id --> user info
 			for (const post of posts) {
 				const finalPost = await getFullDetailPost(ctx, post);
 				finalPosts.push(finalPost);
 			}
-
-			// Panigation
-			const start: number = (pageNumber - 1) * pageSize;
-			const end: number = pageNumber * pageSize;
-			finalPosts = finalPosts.slice(start, end);
 
 			return {
 				message: "Successful request",
