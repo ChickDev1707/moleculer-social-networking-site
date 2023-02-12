@@ -45,9 +45,9 @@ export default class MailerAction {
   };
   private getTemplateWithData(template: string, payload: any){
     // convention: {{key}} in template
-    for(let key in Object.keys(payload)){
+    for(let key in payload){
       const keyRegex = new RegExp(`{{${key}}}`)
-      template = template.replace(keyRegex, payload['key'])
+      template = template.replace(keyRegex, payload[key])
     }
     return template
   }

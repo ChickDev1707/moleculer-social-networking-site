@@ -49,7 +49,8 @@ export default class NotificationAction {
 
 			// send email
 			if(to.email){
-				this.sendNotificationEmail(broker, to.email);
+				const mailContent = `${from.name} ${newNotification.content}`
+				this.sendNotificationEmail(broker, to.email, mailContent);
 			}
 			return {
 				code: 201,
@@ -61,11 +62,15 @@ export default class NotificationAction {
 			throw new Errors.MoleculerError("Internal server error", 500);
 		}
 	};
-	private sendNotificationEmail(broker: ServiceBroker, targetEmail: string){
+	private sendNotificationEmail(broker: ServiceBroker, targetEmail: string, content: string){
 		const mailParams: SendMailDto = {
 			receiver: targetEmail,
-			subject: "test",
-			content: "test",
+			subject: "You have a new notification",
+			template: "notification",
+			payload: {
+				siteDomain: process.env.ROOT_DOMAIN,
+				content
+			}
 		}
 		broker.call("mailer.sendMail", mailParams)
 	}
