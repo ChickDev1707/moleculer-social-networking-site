@@ -56,7 +56,7 @@ const brokerConfig: BrokerOptions  = {
 	// Retry policy settings. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Retry
 	retryPolicy: {
 		// Enable feature
-		enabled: false,
+		enabled: true,
 		// Count of retries
 		retries: 5,
 		// First delay in milliseconds.
@@ -103,11 +103,11 @@ const brokerConfig: BrokerOptions  = {
 	// Settings of Circuit Breaker. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Circuit-Breaker
 	circuitBreaker: {
 		// Enable feature
-		enabled: false,
+		enabled: true,
 		// Threshold value. 0.5 means that 50% should be failed for tripping.
 		threshold: 0.5,
 		// Minimum request count. Below it, CB does not trip.
-		minRequestCount: 20,
+		minRequestCount: 1000,
 		// Number of seconds for time window.
 		windowTime: 60,
 		// Number of milliseconds to switch from open to half-open state
@@ -120,9 +120,9 @@ const brokerConfig: BrokerOptions  = {
 	// Settings of bulkhead feature. More info: https://moleculer.services/docs/0.14/fault-tolerance.html#Bulkhead
 	bulkhead: {
 		// Enable feature.
-		enabled: false,
+		enabled: true,
 		// Maximum concurrent executions.
-		concurrency: 10,
+		concurrency: 1000,
 		// Maximum size of queue
 		maxQueueSize: 100,
 	},
