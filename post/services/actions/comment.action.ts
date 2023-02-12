@@ -130,8 +130,8 @@ export default class CommentAction {
 		try {
 			const { userId, commentId } = ctx.params;
 			const likedComment = await this.commentRepo.likeComment(commentId, userId);
-
-			if(userId != likedComment.postUserId){
+			const finalComment = await getFullDetailComment(ctx, likedComment);
+			if(userId != likedComment.user){
 				ctx.broker.broadcast("notification.create", {
 					from: userId,
 					to: likedComment.user,
@@ -144,21 +144,22 @@ export default class CommentAction {
 			return {
 				message: "liked comment",
 				code: 200,
-				data: likedComment,
+				data: finalComment,
 			};
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);
 		}
 	};
 
-	public dislikeComment = async (ctx: Context<any>): Promise<IApiResponse> => {
+	public unlikeComment= async (ctx: Context<any>): Promise<IApiResponse> => {
 		try {
 			const { userId, commentId } = ctx.params;
-			const dislikedComment = await this.commentRepo.dislikeComment(commentId, userId);
+			const dislikedComment = await this.commentRepo.unlikeComment(commentId, userId);
+			const finalComment = await getFullDetailComment(ctx, dislikedComment);
 			return {
-				message: "Disliked comment",
+				message: "unliked comment",
 				code: 200,
-				data: dislikedComment,
+				data: finalComment,
 			};
 		} catch (error) {
 			throw new Errors.MoleculerError("Internal server error", 500);

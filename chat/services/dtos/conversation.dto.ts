@@ -29,4 +29,5 @@ export interface IResConversation {
 	updatedAt: Date;
 	createdAt: Date;
 	createdBy: string;
+	hasUnreadMessage: boolean;
 }
