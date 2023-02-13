@@ -145,21 +145,23 @@ export default class PostService extends Service {
 					},
 					params: {
 						postId: "string",
+						userId: "string",
 						commentId: "string",
 					},
 					handler: this.commentAct.likeComment,
 				},
 
-				dislikeComment: {
+				unlikeComment: {
 					rest: {
 						method: "PATCH",
-						path: "/:postId/comments/:commentId/dislike",
+						path: "/:postId/comments/:commentId/unlike",
 					},
 					params: {
 						postId: "string",
+						userId: "string",
 						commentId: "string",
 					},
-					handler: this.commentAct.dislikeComment,
+					handler: this.commentAct.unlikeComment,
 				},
 			},
 			stopped: () => {

@@ -37,7 +37,7 @@ export class CommentRepository {
 		return likedComment;
 	}
 
-	public async dislikeComment(commentId: Types.ObjectId, userId: string) {
+	public async unlikeComment(commentId: Types.ObjectId, userId: string) {
 		const dislikedComment = await this.CommentModel.findOneAndUpdate({ _id: commentId }, { $pull: { likes: userId } }, { new: true });
 		return dislikedComment;
 	}

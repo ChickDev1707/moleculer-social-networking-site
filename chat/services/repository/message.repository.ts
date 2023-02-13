@@ -1,4 +1,4 @@
-import { Connection, HydratedDocument, Model, Types } from "mongoose";
+import { Connection, HydratedDocument, Model, ObjectId, Types } from "mongoose";
 import {
   IAnonymousMessageDTO,
 	IDeleteMessageDTO,
@@ -45,8 +45,8 @@ export class MessageRepository {
 		const messages = await this.MessageModel
 			.find({ conversation: conversationId})
 			.sort({ createdAt: -1 })
-			.skip((page - 1) * 5)
-			.limit(5);
+			.skip((page - 1) * 10)
+			.limit(10);
 		return messages;
 	}
 
@@ -114,5 +114,11 @@ export class MessageRepository {
 			.limit(1);
 
 		return message;
+	}
+
+	public async hasUnreadMessage(conversationId: Types.ObjectId, userId: string) {
+		const message = await this.MessageModel.find({ conversation: conversationId, sender:{ $ne: userId },  seenBy: { $ne: userId } })
+			.count()
+		return message > 0;
 	}
 }

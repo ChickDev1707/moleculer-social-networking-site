@@ -57,6 +57,7 @@ export default class ConversationAction {
 				createdAt: newConversation.createdAt,
 				updatedAt: newConversation.updatedAt,
 				createdBy: newConversation.createdBy,
+				hasUnreadMessage: true
 			};
 
 			return {
@@ -96,6 +97,7 @@ export default class ConversationAction {
 				createdAt: updatedConversation.createdAt,
 				updatedAt: updatedConversation.updatedAt,
 				createdBy: updatedConversation.createdBy,
+				hasUnreadMessage: true
 			};
 
 			return {
@@ -137,6 +139,7 @@ export default class ConversationAction {
 				createdAt: updatedConversation.createdAt,
 				updatedAt: updatedConversation.updatedAt,
 				createdBy: updatedConversation.createdBy,
+				hasUnreadMessage: true
 			};
 
 			return {
@@ -183,6 +186,7 @@ export default class ConversationAction {
 				createdAt: conversation.createdAt,
 				updatedAt: conversation.updatedAt,
 				createdBy: conversation.createdBy,
+				hasUnreadMessage: true
 			};
 			return { code: 201, message: "", data: resConversation };
 		} catch (error) {
@@ -211,6 +215,7 @@ export default class ConversationAction {
 			createdAt: conversation.createdAt,
 			updatedAt: conversation.updatedAt,
 			createdBy: conversation.createdBy,
+			hasUnreadMessage: false
 		};
 		return { code: 201, message: "", data: resConversation };
 	};
@@ -234,6 +239,7 @@ export default class ConversationAction {
 							).data
 					)
 				);
+				const hasUnreadMessage = await this.messageRepo.hasUnreadMessage(conversation._id, userId);
 				const resConversation: IResConversation = {
 					_id: conversation._id,
 					members: detailMembers,
@@ -243,6 +249,7 @@ export default class ConversationAction {
 					createdAt: conversation.createdAt,
 					updatedAt: conversation.updatedAt,
 					createdBy: conversation.createdBy,
+					hasUnreadMessage: hasUnreadMessage
 				};
 				resConversations.push(resConversation);
 			}
@@ -302,6 +309,7 @@ export default class ConversationAction {
 				createdAt: conversation.createdAt,
 				updatedAt: conversation.updatedAt,
 				createdBy: conversation.createdBy,
+				hasUnreadMessage: true
 			};
 
 			return {
@@ -342,6 +350,7 @@ export default class ConversationAction {
 				createdAt: updatedConversation.createdAt,
 				updatedAt: updatedConversation.updatedAt,
 				createdBy: updatedConversation.createdBy,
+				hasUnreadMessage: true
 			};
 			return { code: 201, message: "", data: resConversation };
 		} catch (error) {
